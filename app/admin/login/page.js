@@ -100,7 +100,8 @@ export default function AdminLogin() {
             </Button>
 
             <div className="text-center text-sm text-gray-500 mt-4">
-              <p>Please enter your credentials to continue.</p>
+              <p>Default credentials:</p>
+              <p className="font-mono text-xs">admin / admin123</p>
             </div>
           </form>
         </CardContent>

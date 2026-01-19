@@ -160,10 +160,7 @@ export async function POST(request, { params }) {
       const { username, password } = body;
 
       // Simple auth - in production, use hashed passwords
-      const adminUser = process.env.ADMIN_USERNAME || 'admin';
-      const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
-
-      if (username === adminUser && password === adminPass) {
+      if (username === 'admin' && password === 'admin123') {
         const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
         return NextResponse.json({ token, user: { username } }, { headers: corsHeaders() });
       }
