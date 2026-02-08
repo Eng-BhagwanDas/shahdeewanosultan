@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabase';
+import { query, querySingle } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,71 +24,40 @@ export async function GET(request, { params }) {
 
     // Get dashboard stats
     if (path === 'stats') {
-      const { count: saintsCount } = await supabase
-        .from('saints')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
+      const tables = [
+        { name: 'saints', lang: true },
+        { name: 'books', lang: true },
+        { name: 'audio', lang: true },
+        { name: 'videos', lang: false },
+        { name: 'events', lang: true },
+        { name: 'gallery', lang: false },
+        { name: 'news', lang: true },
+        { name: 'slider', lang: false },
+        { name: 'poetry', lang: true }
+      ];
 
-      const { count: booksCount } = await supabase
-        .from('books')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
+      const stats = {};
 
-      const { count: audioCount } = await supabase
-        .from('audio')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
+      for (const table of tables) {
+        let sql = `SELECT COUNT(*) FROM ${table.name}`;
+        const params = [];
 
-      const { count: videosCount } = await supabase
-        .from('videos')
-        .select('*', { count: 'exact', head: true });
+        if (table.lang) {
+          sql += ` WHERE language = $1`;
+          params.push('en');
+        }
 
-      const { count: eventsCount } = await supabase
-        .from('events')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
+        const res = await querySingle(sql, params);
+        stats[table.name] = parseInt(res.count);
+      }
 
-      const { count: galleryCount } = await supabase
-        .from('gallery')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: newsCount } = await supabase
-        .from('news')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
-
-      const { count: sliderCount } = await supabase
-        .from('slider')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: poetryCount } = await supabase
-        .from('poetry')
-        .select('*', { count: 'exact', head: true })
-        .eq('language', 'en');
-
-      const stats = {
-        saints: saintsCount || 0,
-        books: booksCount || 0,
-        audio: audioCount || 0,
-        videos: videosCount || 0,
-        events: eventsCount || 0,
-        gallery: galleryCount || 0,
-        news: newsCount || 0,
-        slider: sliderCount || 0,
-        poetry: poetryCount || 0,
-      };
       return NextResponse.json({ stats }, { headers: corsHeaders() });
     }
 
     // Get slider images
     if (path === 'slider') {
-      const { data, error } = await supabase
-        .from('slider')
-        .select('*')
-        .order('order', { ascending: true });
-
-      if (error) throw error;
-      return NextResponse.json({ slides: data || [] }, { headers: corsHeaders() });
+      const result = await query('SELECT * FROM slider ORDER BY "order" ASC');
+      return NextResponse.json({ slides: result.rows }, { headers: corsHeaders() });
     }
 
     // Get content by page name and language
@@ -100,18 +69,14 @@ export async function GET(request, { params }) {
         return NextResponse.json({ error: 'Page name required' }, { status: 400, headers: corsHeaders() });
       }
 
-      const { data, error } = await supabase
-        .from('content')
-        .select('*')
-        .eq('pageName', pageName)
-        .eq('language', language)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+      const result = await querySingle(
+        'SELECT * FROM content WHERE "pageName" = $1 AND language = $2',
+        [pageName, language]
+      );
 
       let content = null;
-      if (data) {
-        content = { ...data, ...data.data };
+      if (result) {
+        content = { ...result, ...result.data };
         delete content.data;
       }
 
@@ -121,42 +86,34 @@ export async function GET(request, { params }) {
     // Get all saints
     if (path === 'saints') {
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('saints')
-        .select('*')
-        .eq('language', language)
-        .order('order', { ascending: true });
-
-      if (error) throw error;
-      return NextResponse.json({ saints: data || [] }, { headers: corsHeaders() });
+      const result = await query(
+        'SELECT * FROM saints WHERE language = $1 ORDER BY "order" ASC',
+        [language]
+      );
+      return NextResponse.json({ saints: result.rows }, { headers: corsHeaders() });
     }
 
     // Get saint by ID
     if (path.startsWith('saints/')) {
       const saintId = path.split('/')[1];
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('saints')
-        .select('*')
-        .eq('id', saintId)
-        .eq('language', language)
-        .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      return NextResponse.json({ saint: data }, { headers: corsHeaders() });
+      const saint = await querySingle(
+        'SELECT * FROM saints WHERE id = $1 AND language = $2',
+        [saintId, language]
+      );
+
+      return NextResponse.json({ saint }, { headers: corsHeaders() });
     }
 
     // Get books
     if (path === 'books') {
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .eq('language', language)
-        .order('createdAt', { ascending: false });
-
-      if (error) throw error;
-      return NextResponse.json({ books: data || [] }, { headers: corsHeaders() });
+      const result = await query(
+        'SELECT * FROM books WHERE language = $1 ORDER BY "createdAt" DESC',
+        [language]
+      );
+      return NextResponse.json({ books: result.rows }, { headers: corsHeaders() });
     }
 
     // Get audio files
@@ -164,80 +121,60 @@ export async function GET(request, { params }) {
       const category = searchParams.get('category'); // hamd, naat, dua
       const language = searchParams.get('language') || 'en';
 
-      let query = supabase
-        .from('audio')
-        .select('*')
-        .eq('language', language);
+      let sql = 'SELECT * FROM audio WHERE language = $1';
+      const params = [language];
 
       if (category) {
-        query = query.eq('category', category);
+        sql += ' AND category = $2';
+        params.push(category);
       }
 
-      const { data, error } = await query.order('createdAt', { ascending: false });
+      sql += ' ORDER BY "createdAt" DESC';
 
-      if (error) throw error;
-      return NextResponse.json({ audioFiles: data || [] }, { headers: corsHeaders() });
+      const result = await query(sql, params);
+      return NextResponse.json({ audioFiles: result.rows }, { headers: corsHeaders() });
     }
 
     // Get videos
     if (path === 'videos') {
-      const { data, error } = await supabase
-        .from('videos')
-        .select('*')
-        .order('createdAt', { ascending: false });
-
-      if (error) throw error;
-      return NextResponse.json({ videos: data || [] }, { headers: corsHeaders() });
+      const result = await query('SELECT * FROM videos ORDER BY "createdAt" DESC');
+      return NextResponse.json({ videos: result.rows }, { headers: corsHeaders() });
     }
 
     // Get events
     if (path === 'events') {
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('language', language)
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      return NextResponse.json({ events: data || [] }, { headers: corsHeaders() });
+      const result = await query(
+        'SELECT * FROM events WHERE language = $1 ORDER BY "date" ASC',
+        [language]
+      );
+      return NextResponse.json({ events: result.rows }, { headers: corsHeaders() });
     }
 
     // Get news/press releases
     if (path === 'news') {
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('news')
-        .select('*')
-        .eq('language', language)
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-      return NextResponse.json({ news: data || [] }, { headers: corsHeaders() });
+      const result = await query(
+        'SELECT * FROM news WHERE language = $1 ORDER BY "date" DESC',
+        [language]
+      );
+      return NextResponse.json({ news: result.rows }, { headers: corsHeaders() });
     }
 
     // Get gallery images
     if (path === 'gallery') {
-      const { data, error } = await supabase
-        .from('gallery')
-        .select('*')
-        .order('createdAt', { ascending: false });
-
-      if (error) throw error;
-      return NextResponse.json({ gallery: data || [] }, { headers: corsHeaders() });
+      const result = await query('SELECT * FROM gallery ORDER BY "createdAt" DESC');
+      return NextResponse.json({ gallery: result.rows }, { headers: corsHeaders() });
     }
 
     // Get poetry
     if (path === 'poetry') {
       const language = searchParams.get('language') || 'en';
-      const { data, error } = await supabase
-        .from('poetry')
-        .select('*')
-        .eq('language', language)
-        .order('createdAt', { ascending: false });
-
-      if (error) throw error;
-      return NextResponse.json({ poetry: data || [] }, { headers: corsHeaders() });
+      const result = await query(
+        'SELECT * FROM poetry WHERE language = $1 ORDER BY "createdAt" DESC',
+        [language]
+      );
+      return NextResponse.json({ poetry: result.rows }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
@@ -275,38 +212,31 @@ export async function POST(request, { params }) {
 
     if (collections.includes(path)) {
       const insertData = { ...body, id };
+      const columns = Object.keys(insertData).map(key => `"${key}"`).join(', ');
+      const values = Object.values(insertData);
+      const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
 
-      const { data, error } = await supabase
-        .from(path)
-        .insert([insertData])
-        .select()
-        .single();
+      const sql = `INSERT INTO ${path} (${columns}) VALUES (${placeholders}) RETURNING *`;
+      const result = await querySingle(sql, values);
 
-      if (error) throw error;
-
-      return NextResponse.json({ [path === 'audio' ? 'audio' : path.slice(0, -1)]: data }, { headers: corsHeaders() });
+      return NextResponse.json({ [path === 'audio' ? 'audio' : path.slice(0, -1)]: result }, { headers: corsHeaders() });
     }
 
     // Add/Update content
     if (path === 'content') {
       const { pageName, language, ...contentData } = body;
 
-      const { data, error } = await supabase
-        .from('content')
-        .upsert([{
-          id,
-          pageName,
-          language,
-          data: contentData
-        }], {
-          onConflict: 'pageName,language'
-        })
-        .select()
-        .single();
+      const sql = `
+        INSERT INTO content (id, "pageName", language, data)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT ("pageName", language)
+        DO UPDATE SET data = $4
+        RETURNING *
+      `;
 
-      if (error) throw error;
+      const result = await querySingle(sql, [id, pageName, language, contentData]);
 
-      return NextResponse.json({ content: { ...data, ...data.data } }, { headers: corsHeaders() });
+      return NextResponse.json({ content: { ...result, ...result.data } }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
@@ -333,38 +263,41 @@ export async function PUT(request, { params }) {
     const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry'];
 
     if (collections.includes(path)) {
-      let query = supabase
-        .from(path)
-        .update(updateData)
-        .eq('id', id);
+      const keys = Object.keys(updateData);
+      const setClause = keys.map((key, i) => `"${key}" = $${i + 1}`).join(', ');
+      const values = Object.values(updateData);
+
+      let sql = `UPDATE ${path} SET ${setClause} WHERE id = $${values.length + 1}`;
+      const params = [...values, id];
 
       if (updateData.language) {
-        query = query.eq('language', updateData.language);
+        sql += ` AND language = $${values.length + 2}`;
+        params.push(updateData.language);
       }
 
-      const { data, error } = await query.select();
+      sql += ` RETURNING *`;
 
-      if (error) throw error;
+      const result = await query(sql, params);
 
       return NextResponse.json({
         success: true,
-        updated: data?.length || 0
+        updated: result.rowCount
       }, { headers: corsHeaders() });
     }
 
     if (path === 'content') {
       const { pageName, language, ...contentData } = updateData;
 
-      const { data, error } = await supabase
-        .from('content')
-        .update({ data: contentData })
-        .eq('pageName', pageName)
-        .eq('language', language)
-        .select();
+      const sql = `
+        UPDATE content 
+        SET data = $1 
+        WHERE "pageName" = $2 AND language = $3 
+        RETURNING *
+      `;
 
-      if (error) throw error;
+      const result = await query(sql, [contentData, pageName, language]);
 
-      return NextResponse.json({ success: true, updated: data?.length || 0 }, { headers: corsHeaders() });
+      return NextResponse.json({ success: true, updated: result.rowCount }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
@@ -391,13 +324,7 @@ export async function DELETE(request, { params }) {
     const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry'];
 
     if (collections.includes(path)) {
-      const { error } = await supabase
-        .from(path)
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      const result = await query(`DELETE FROM ${path} WHERE id = $1`, [id]);
       return NextResponse.json({ success: true }, { headers: corsHeaders() });
     }
 
