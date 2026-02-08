@@ -197,7 +197,15 @@ export async function POST(request, { params }) {
     // Admin login
     if (path === 'auth/login') {
       const { username, password } = body;
-      if (username === 'admin' && password === 'admin123') {
+      const adminUser = process.env.ADMIN_USERNAME;
+      const adminPass = process.env.ADMIN_PASSWORD;
+
+      if (!adminUser || !adminPass) {
+        console.error('❌ Admin credentials not set in .env');
+        return NextResponse.json({ error: 'Server configuration error' }, { status: 500, headers: corsHeaders() });
+      }
+
+      if (username === adminUser && password === adminPass) {
         const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
         return NextResponse.json({ token, user: { username } }, { headers: corsHeaders() });
       }
