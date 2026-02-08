@@ -1,0 +1,123 @@
+-- Create Database
+CREATE DATABASE IF NOT EXISTS shahdeewanosultan;
+USE shahdeewanosultan;
+
+-- Slider Table
+CREATE TABLE IF NOT EXISTS slider (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(255),
+    imageUrl TEXT,
+    `order` INT DEFAULT 0,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Saints Table
+CREATE TABLE IF NOT EXISTS saints (
+    autoId INT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(100), -- Unique identifier used in URLs/IDs
+    language VARCHAR(10) NOT NULL,
+    name VARCHAR(255),
+    title VARCHAR(255),
+    content TEXT,
+    biography TEXT,
+    imageUrl TEXT,
+    `order` INT DEFAULT 0,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (id, language)
+);
+
+-- Books Table
+CREATE TABLE IF NOT EXISTS books (
+    id VARCHAR(50) PRIMARY KEY,
+    language VARCHAR(10) NOT NULL,
+    title VARCHAR(255),
+    author VARCHAR(255),
+    description TEXT,
+    pdfUrl TEXT,
+    imageUrl TEXT,
+    category VARCHAR(100),
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Audio Table
+CREATE TABLE IF NOT EXISTS audio (
+    id VARCHAR(50) PRIMARY KEY,
+    language VARCHAR(10) NOT NULL,
+    title VARCHAR(255),
+    artist VARCHAR(255),
+    category VARCHAR(50), -- hamd, naat, dua
+    audioUrl TEXT,
+    thumbnailUrl TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Videos Table
+CREATE TABLE IF NOT EXISTS videos (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(255),
+    videoUrl TEXT,
+    thumbnailUrl TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Events Table
+CREATE TABLE IF NOT EXISTS events (
+    id VARCHAR(50) PRIMARY KEY,
+    language VARCHAR(10) NOT NULL,
+    title VARCHAR(255),
+    description TEXT,
+    date DATE,
+    location VARCHAR(255),
+    imageUrl TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- News Table
+CREATE TABLE IF NOT EXISTS news (
+    id VARCHAR(50) PRIMARY KEY,
+    language VARCHAR(10) NOT NULL,
+    title VARCHAR(255),
+    content TEXT,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    imageUrl TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Gallery Table
+CREATE TABLE IF NOT EXISTS gallery (
+    id VARCHAR(50) PRIMARY KEY,
+    title VARCHAR(255),
+    imageUrl TEXT,
+    category VARCHAR(100),
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Poetry Table
+CREATE TABLE IF NOT EXISTS poetry (
+    id VARCHAR(50) PRIMARY KEY,
+    language VARCHAR(10) NOT NULL,
+    title VARCHAR(255),
+    content TEXT,
+    author VARCHAR(255),
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Content Table (Flexible content for pages)
+CREATE TABLE IF NOT EXISTS content (
+    autoId INT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(50), -- UUID
+    pageName VARCHAR(100) NOT NULL,
+    language VARCHAR(10) NOT NULL,
+    data JSON, -- Flexible data storage
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (pageName, language)
+);

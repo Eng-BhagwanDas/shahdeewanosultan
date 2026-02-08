@@ -1,26 +1,6 @@
-import { MongoClient } from 'mongodb';
+import supabase from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-
-const MONGO_URL = process.env.MONGO_URL;
-const DB_NAME = process.env.DB_NAME || 'dargah_portal';
-
-let cachedClient = null;
-let cachedDb = null;
-
-async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  const client = await MongoClient.connect(MONGO_URL);
-  const db = client.db(DB_NAME);
-
-  cachedClient = client;
-  cachedDb = db;
-
-  return { client, db };
-}
 
 // Helper to handle CORS
 function corsHeaders() {
@@ -36,31 +16,79 @@ export async function OPTIONS() {
 }
 
 export async function GET(request, { params }) {
+  const start = Date.now();
+  console.log(`⏱️ GET Request started: ${params.path?.join('/') || ''} at ${new Date().toISOString()}`);
   try {
-    const { db } = await connectToDatabase();
     const path = params.path ? params.path.join('/') : '';
     const { searchParams } = new URL(request.url);
 
     // Get dashboard stats
     if (path === 'stats') {
+      const { count: saintsCount } = await supabase
+        .from('saints')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
+      const { count: booksCount } = await supabase
+        .from('books')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
+      const { count: audioCount } = await supabase
+        .from('audio')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
+      const { count: videosCount } = await supabase
+        .from('videos')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: eventsCount } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
+      const { count: galleryCount } = await supabase
+        .from('gallery')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: newsCount } = await supabase
+        .from('news')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
+      const { count: sliderCount } = await supabase
+        .from('slider')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: poetryCount } = await supabase
+        .from('poetry')
+        .select('*', { count: 'exact', head: true })
+        .eq('language', 'en');
+
       const stats = {
-        saints: await db.collection('saints').countDocuments({ language: 'en' }),
-        books: await db.collection('books').countDocuments({ language: 'en' }),
-        audio: await db.collection('audio').countDocuments({ language: 'en' }),
-        videos: await db.collection('videos').countDocuments({}),
-        events: await db.collection('events').countDocuments({ language: 'en' }),
-        gallery: await db.collection('gallery').countDocuments({}),
-        news: await db.collection('news').countDocuments({ language: 'en' }),
-        slider: await db.collection('slider').countDocuments({}),
-        poetry: await db.collection('poetry').countDocuments({ language: 'en' }),
+        saints: saintsCount || 0,
+        books: booksCount || 0,
+        audio: audioCount || 0,
+        videos: videosCount || 0,
+        events: eventsCount || 0,
+        gallery: galleryCount || 0,
+        news: newsCount || 0,
+        slider: sliderCount || 0,
+        poetry: poetryCount || 0,
       };
       return NextResponse.json({ stats }, { headers: corsHeaders() });
     }
 
     // Get slider images
     if (path === 'slider') {
-      const slides = await db.collection('slider').find({}).sort({ order: 1 }).toArray();
-      return NextResponse.json({ slides }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('slider')
+        .select('*')
+        .order('order', { ascending: true });
+
+      if (error) throw error;
+      return NextResponse.json({ slides: data || [] }, { headers: corsHeaders() });
     }
 
     // Get content by page name and language
@@ -72,245 +100,228 @@ export async function GET(request, { params }) {
         return NextResponse.json({ error: 'Page name required' }, { status: 400, headers: corsHeaders() });
       }
 
-      const content = await db.collection('content').findOne({ pageName, language });
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('pageName', pageName)
+        .eq('language', language)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+
+      let content = null;
+      if (data) {
+        content = { ...data, ...data.data };
+        delete content.data;
+      }
+
       return NextResponse.json({ content }, { headers: corsHeaders() });
     }
 
     // Get all saints
     if (path === 'saints') {
       const language = searchParams.get('language') || 'en';
-      const saints = await db.collection('saints').find({ language }).sort({ order: 1 }).toArray();
-      return NextResponse.json({ saints }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('saints')
+        .select('*')
+        .eq('language', language)
+        .order('order', { ascending: true });
+
+      if (error) throw error;
+      return NextResponse.json({ saints: data || [] }, { headers: corsHeaders() });
     }
 
     // Get saint by ID
     if (path.startsWith('saints/')) {
       const saintId = path.split('/')[1];
       const language = searchParams.get('language') || 'en';
-      const saint = await db.collection('saints').findOne({ id: saintId, language });
-      return NextResponse.json({ saint }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('saints')
+        .select('*')
+        .eq('id', saintId)
+        .eq('language', language)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return NextResponse.json({ saint: data }, { headers: corsHeaders() });
     }
 
     // Get books
     if (path === 'books') {
       const language = searchParams.get('language') || 'en';
-      const books = await db.collection('books').find({ language }).sort({ createdAt: -1 }).toArray();
-      return NextResponse.json({ books }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('books')
+        .select('*')
+        .eq('language', language)
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ books: data || [] }, { headers: corsHeaders() });
     }
 
     // Get audio files
     if (path === 'audio') {
       const category = searchParams.get('category'); // hamd, naat, dua
       const language = searchParams.get('language') || 'en';
-      const query = { language };
-      if (category) query.category = category;
 
-      const audioFiles = await db.collection('audio').find(query).sort({ createdAt: -1 }).toArray();
-      return NextResponse.json({ audioFiles }, { headers: corsHeaders() });
+      let query = supabase
+        .from('audio')
+        .select('*')
+        .eq('language', language);
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      const { data, error } = await query.order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ audioFiles: data || [] }, { headers: corsHeaders() });
     }
 
     // Get videos
     if (path === 'videos') {
-      const videos = await db.collection('videos').find({}).sort({ createdAt: -1 }).toArray();
-      return NextResponse.json({ videos }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('videos')
+        .select('*')
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ videos: data || [] }, { headers: corsHeaders() });
     }
 
     // Get events
     if (path === 'events') {
       const language = searchParams.get('language') || 'en';
-      const events = await db.collection('events').find({ language }).sort({ date: 1 }).toArray();
-      return NextResponse.json({ events }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('language', language)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      return NextResponse.json({ events: data || [] }, { headers: corsHeaders() });
     }
 
     // Get news/press releases
     if (path === 'news') {
       const language = searchParams.get('language') || 'en';
-      const news = await db.collection('news').find({ language }).sort({ date: -1 }).toArray();
-      return NextResponse.json({ news }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .eq('language', language)
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ news: data || [] }, { headers: corsHeaders() });
     }
 
     // Get gallery images
     if (path === 'gallery') {
-      const gallery = await db.collection('gallery').find({}).sort({ createdAt: -1 }).toArray();
-      return NextResponse.json({ gallery }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('gallery')
+        .select('*')
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ gallery: data || [] }, { headers: corsHeaders() });
     }
 
     // Get poetry
     if (path === 'poetry') {
       const language = searchParams.get('language') || 'en';
-      const poetry = await db.collection('poetry').find({ language }).sort({ createdAt: -1 }).toArray();
-      return NextResponse.json({ poetry }, { headers: corsHeaders() });
+      const { data, error } = await supabase
+        .from('poetry')
+        .select('*')
+        .eq('language', language)
+        .order('createdAt', { ascending: false });
+
+      if (error) throw error;
+      return NextResponse.json({ poetry: data || [] }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
   } catch (error) {
-    console.error('GET Error:', error);
+    console.error('GET Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders() });
   }
 }
 
 export async function POST(request, { params }) {
   try {
-    const { db } = await connectToDatabase();
     const path = params.path ? params.path.join('/') : '';
     const body = await request.json();
 
     // Admin login
     if (path === 'auth/login') {
       const { username, password } = body;
-
-      // Simple auth - in production, use hashed passwords
       if (username === 'admin' && password === 'admin123') {
         const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
         return NextResponse.json({ token, user: { username } }, { headers: corsHeaders() });
       }
-
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401, headers: corsHeaders() });
     }
 
-    // Add slider
-    if (path === 'slider') {
-      const slide = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('slider').insertOne(slide);
-      return NextResponse.json({ slide }, { headers: corsHeaders() });
+    const id = body.id || uuidv4();
+    const language = body.language || 'en';
+
+    // Generic handler for most collections
+    const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry'];
+
+    if (collections.includes(path)) {
+      const insertData = { ...body, id };
+
+      const { data, error } = await supabase
+        .from(path)
+        .insert([insertData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return NextResponse.json({ [path === 'audio' ? 'audio' : path.slice(0, -1)]: data }, { headers: corsHeaders() });
     }
 
     // Add/Update content
     if (path === 'content') {
       const { pageName, language, ...contentData } = body;
 
-      const content = {
-        id: uuidv4(),
-        pageName,
-        language,
-        ...contentData,
-        updatedAt: new Date(),
-      };
+      const { data, error } = await supabase
+        .from('content')
+        .upsert([{
+          id,
+          pageName,
+          language,
+          data: contentData
+        }], {
+          onConflict: 'pageName,language'
+        })
+        .select()
+        .single();
 
-      await db.collection('content').updateOne(
-        { pageName, language },
-        { $set: content },
-        { upsert: true }
-      );
+      if (error) throw error;
 
-      return NextResponse.json({ content }, { headers: corsHeaders() });
-    }
-
-    // Add saint
-    if (path === 'saints') {
-      const { id, language } = body;
-
-      // Check for duplicate
-      if (id && language) {
-        const existing = await db.collection('saints').findOne({ id, language });
-        if (existing) {
-          return NextResponse.json(
-            { error: `Saint already exists for language '${language}'. Please use Edit.` },
-            { status: 409, headers: corsHeaders() }
-          );
-        }
-      }
-
-      const saint = {
-        id: id || uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('saints').insertOne(saint);
-      return NextResponse.json({ saint }, { headers: corsHeaders() });
-    }
-
-    // Add book
-    if (path === 'books') {
-      const book = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('books').insertOne(book);
-      return NextResponse.json({ book }, { headers: corsHeaders() });
-    }
-
-    // Add audio
-    if (path === 'audio') {
-      const audio = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('audio').insertOne(audio);
-      return NextResponse.json({ audio }, { headers: corsHeaders() });
-    }
-
-    // Add video
-    if (path === 'videos') {
-      const video = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('videos').insertOne(video);
-      return NextResponse.json({ video }, { headers: corsHeaders() });
-    }
-
-    // Add event
-    if (path === 'events') {
-      const event = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('events').insertOne(event);
-      return NextResponse.json({ event }, { headers: corsHeaders() });
-    }
-
-    // Add news
-    if (path === 'news') {
-      const news = {
-        id: uuidv4(),
-        ...body,
-        date: new Date(),
-      };
-      await db.collection('news').insertOne(news);
-      return NextResponse.json({ news }, { headers: corsHeaders() });
-    }
-
-    // Add gallery image
-    if (path === 'gallery') {
-      const image = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('gallery').insertOne(image);
-      return NextResponse.json({ image }, { headers: corsHeaders() });
-    }
-
-    // Add poetry
-    if (path === 'poetry') {
-      const poem = {
-        id: uuidv4(),
-        ...body,
-        createdAt: new Date(),
-      };
-      await db.collection('poetry').insertOne(poem);
-      return NextResponse.json({ poem }, { headers: corsHeaders() });
+      return NextResponse.json({ content: { ...data, ...data.data } }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
   } catch (error) {
-    console.error('POST Error:', error);
+    console.error('POST Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+    });
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders() });
   }
 }
 
 export async function PUT(request, { params }) {
   try {
-    const { db } = await connectToDatabase();
     const path = params.path ? params.path.join('/') : '';
     const body = await request.json();
     const { id, ...updateData } = body;
@@ -319,37 +330,56 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: 'ID required' }, { status: 400, headers: corsHeaders() });
     }
 
-    const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry', 'content'];
+    const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry'];
 
     if (collections.includes(path)) {
-      const query = { id };
+      let query = supabase
+        .from(path)
+        .update(updateData)
+        .eq('id', id);
+
       if (updateData.language) {
-        query.language = updateData.language;
+        query = query.eq('language', updateData.language);
       }
 
-      const result = await db.collection(path).updateOne(
-        query,
-        { $set: { ...updateData, updatedAt: new Date() } },
-        { upsert: true }
-      );
+      const { data, error } = await query.select();
+
+      if (error) throw error;
 
       return NextResponse.json({
         success: true,
-        updated: result.modifiedCount,
-        upserted: result.upsertedCount
+        updated: data?.length || 0
       }, { headers: corsHeaders() });
+    }
+
+    if (path === 'content') {
+      const { pageName, language, ...contentData } = updateData;
+
+      const { data, error } = await supabase
+        .from('content')
+        .update({ data: contentData })
+        .eq('pageName', pageName)
+        .eq('language', language)
+        .select();
+
+      if (error) throw error;
+
+      return NextResponse.json({ success: true, updated: data?.length || 0 }, { headers: corsHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });
   } catch (error) {
-    console.error('PUT Error:', error);
+    console.error('PUT Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+    });
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders() });
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const { db } = await connectToDatabase();
     const path = params.path ? params.path.join('/') : '';
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -361,7 +391,13 @@ export async function DELETE(request, { params }) {
     const collections = ['slider', 'saints', 'books', 'audio', 'videos', 'events', 'news', 'gallery', 'poetry'];
 
     if (collections.includes(path)) {
-      await db.collection(path).deleteOne({ id });
+      const { error } = await supabase
+        .from(path)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
       return NextResponse.json({ success: true }, { headers: corsHeaders() });
     }
 

@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, ArrowLeft, Loader2 } from 'lucide-react';
+import { Download, ArrowLeft, Loader2, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-// Default saints data as fallback (same structure as original)
+// Default saints data as fallback
 const defaultSaintsData = {
   en: [
     {
@@ -242,174 +243,191 @@ export default function SaintsPage() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-neutral-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Navigation Bar */}
-      <nav className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 text-white shadow-lg sticky top-0 z-50">
+      <nav className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white shadow-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link href="/">
-              <Button variant="ghost" className="text-white hover:bg-white/10">
+              <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white transition-colors">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 {language === 'en' ? 'Back to Home' : language === 'ur' ? 'واپس ہوم پیج' : 'واپس گهر'}
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold text-center flex-1">
+            <h1 className="text-xl md:text-2xl font-bold text-center flex-1 tracking-wide">
               {language === 'en' ? 'Blessed Saints' : language === 'ur' ? 'مقدس بزرگان' : 'مقدس بزرگ'}
             </h1>
-            <div className="flex space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleLanguageChange('en')}
-                className={`${language === 'en' ? 'bg-white/20' : 'hover:bg-white/10'}`}
-              >
-                English
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleLanguageChange('ur')}
-                className={`${language === 'ur' ? 'bg-white/20' : 'hover:bg-white/10'}`}
-              >
-                اردو
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleLanguageChange('sd')}
-                className={`${language === 'sd' ? 'bg-white/20' : 'hover:bg-white/10'}`}
-              >
-                سنڌي
-              </Button>
+            <div className="flex space-x-1">
+              {['en', 'ur', 'sd'].map((lang) => (
+                <Button
+                  key={lang}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleLanguageChange(lang)}
+                  className={cn(
+                    "uppercase text-xs font-semibold px-2 hover:bg-white/10 hover:text-white",
+                    language === lang ? "bg-white/20 text-white ring-1 ring-white/30" : "text-emerald-100"
+                  )}
+                >
+                  {lang === 'en' ? 'ENG' : lang === 'ur' ? 'اردو' : 'سنڌي'}
+                </Button>
+              ))}
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative h-64 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1632782532013-bd3f5f9197db?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2MDAwOTQ5Mnww&ixlib=rb-4.1.0&q=85"
-          alt="Saints"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/30 flex items-center justify-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">
-            {language === 'en' ? 'Our Blessed Saints' : language === 'ur' ? 'ہمارے مقدس بزرگان' : 'اسان جا مقدس بزرگ'}
+      <div className="relative h-48 md:h-64 overflow-hidden bg-emerald-900">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 via-transparent to-transparent"></div>
+        <div className="container mx-auto px-4 h-full flex flex-col justify-center relative z-10">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 drop-shadow-md">
+            {language === 'en' ? 'Lives of the Saints' : language === 'ur' ? 'اولیاء اللہ کا تذکرہ' : 'اولياء الله جو ذڪر'}
           </h1>
+          <p className="text-emerald-100 text-lg md:text-xl opacity-90 max-w-2xl">
+            {language === 'en'
+              ? 'Discover the spiritual legacy and teachings of our revered masters.'
+              : language === 'ur'
+                ? 'ہمارے معزز بزرگوں کی روحانی میراث اور تعلیمات کو دریافت کریں۔'
+                : 'اسان جي معزز بزرگن جي روحاني ورثي ۽ تعليمات کي دريافت ڪريو.'}
+          </p>
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <div className="container mx-auto px-4 py-16">
-        <Tabs defaultValue={saints[0]?.id || 'saint1'} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 mb-8">
-            {saints.map((saint, index) => (
-              <TabsTrigger key={saint.id} value={saint.id} className="text-sm">
-                {language === 'en' ? `Saint ${index + 1}` : language === 'ur' ? `بزرگ ${index + 1}` : `بزرگ ${index + 1}`}
+      {/* Main Content Area */}
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        <Tabs defaultValue={saints[0]?.id || 'saint1'} orientation="vertical" className="flex flex-col lg:flex-row gap-8">
+
+          {/* Sidebar / Tabs List */}
+          <TabsList className="flex lg:flex-col items-stretch justify-start lg:w-1/4 h-auto bg-transparent p-0 space-x-2 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 min-w-0">
+            {saints.map((saint) => (
+              <TabsTrigger
+                key={saint.id}
+                value={saint.id}
+                className={cn(
+                  "relative flex flex-col items-start justify-center p-4 rounded-xl border border-transparent transition-all duration-300 text-left whitespace-normal h-auto min-h-[5rem]",
+                  "data-[state=active]:bg-white data-[state=active]:border-emerald-100 data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
+                  "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-1/4 data-[state=active]:after:bottom-1/4 data-[state=active]:after:w-1 data-[state=active]:after:bg-emerald-500 data-[state=active]:after:rounded-r-full",
+                  "hover:bg-white/50 hover:border-emerald-100/50"
+                )}
+              >
+                <span className={cn(
+                  "font-bold text-base md:text-lg line-clamp-2 w-full",
+                  "data-[state=active]:text-emerald-800 text-slate-600"
+                )}>
+                  {saint.name}
+                </span>
+                <span className="text-xs text-emerald-600/70 mt-1 uppercase tracking-wider font-semibold hidden md:block">
+                  {saint.title?.split(' ')[0]}...
+                </span>
+                {isRTL ? (
+                  <ChevronRight className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-200 opacity-0 data-[state=active]:opacity-100 transition-opacity rotate-180" />
+                ) : (
+                  <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-200 opacity-0 data-[state=active]:opacity-100 transition-opacity" />
+                )}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {saints.map((saint) => (
-            <TabsContent key={saint.id} value={saint.id}>
-              <Card>
-                <CardContent className="p-8">
-                  <div className="mb-8">
-                    <h2 className={`font-bold text-emerald-800 mb-2 ${language === 'ur' ? 'font-urdu text-4xl md:text-5xl' :
-                        language === 'sd' ? 'font-sindhi text-3xl md:text-4xl' :
-                          'text-3xl md:text-4xl'
-                      }`}>
-                      {saint.name}
-                    </h2>
-                    <p className="text-xl text-gray-600 mb-6">{saint.title}</p>
-                    <div className="w-20 h-1 bg-gradient-to-r from-emerald-600 to-teal-600 mb-8"></div>
+          {/* Content Area */}
+          <div className="flex-1 min-w-0">
+            {saints.map((saint) => (
+              <TabsContent key={saint.id} value={saint.id} className="mt-0 focus-visible:outline-none animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
+                <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-sm overflow-hidden rounded-2xl ring-1 ring-slate-900/5">
+                  <div className="md:flex">
+                    {/* Image Section - Mobile: Top, Desktop: Right Side or Left Side? Let's go with standard Layout */}
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    <div className="md:col-span-2">
-                      <p className={`text-gray-700 whitespace-pre-line ${language === 'ur' ? 'font-urdu text-xl leading-[2.5]' :
-                        language === 'sd' ? 'font-sindhi text-lg leading-relaxed' :
-                          'text-lg leading-relaxed'
-                        }`}>
-                        {saint.content}
-                      </p>
-                    </div>
-                    <div>
+                  <CardContent className="p-0">
+                    <div className="relative h-64 md:h-96 w-full overflow-hidden group">
                       <img
                         src={saint.imageUrl || "https://images.unsplash.com/photo-1542414110-ae27fdb87ee1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2MDAwOTQ5Mnww&ixlib=rb-4.1.0&q=85"}
                         alt={saint.name}
-                        className="rounded-lg shadow-xl"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                      <div className="absolute bottom-0 left-0 p-8 text-white">
+                        <div className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase bg-emerald-500/90 rounded-full backdrop-blur-md">
+                          {language === 'en' ? 'Noble Saint' : language === 'ur' ? 'عظیم بزرگ' : 'عظيم بزرگ'}
+                        </div>
+                        <h2 className={`font-bold text-3xl md:text-5xl leading-tight mb-2 ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
+                          {saint.name}
+                        </h2>
+                        <p className="text-emerald-100 text-lg font-medium">{saint.title}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <Card className="bg-emerald-50 border-emerald-200">
-                      <CardContent className="p-6 text-center">
-                        <h3 className="font-bold mb-2 text-emerald-800">
-                          {language === 'en' ? 'English Version' : language === 'ur' ? 'انگریزی ورژن' : 'انگريزي ورزن'}
+                    <div className="p-8 md:p-12">
+                      <div className="prose prose-lg max-w-none prose-headings:text-emerald-900 prose-p:text-slate-600 prose-a:text-emerald-600">
+                        <p className={`whitespace-pre-line ${language === 'ur' ? 'font-urdu text-xl leading-[2.2]' : language === 'sd' ? 'font-sindhi text-lg leading-relaxed' : 'text-lg leading-relaxed text- justify'}`}>
+                          {saint.content}
+                        </p>
+                      </div>
+
+                      <div className="mt-12 pt-8 border-t border-slate-100">
+                        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                          <Download className="mr-2 h-5 w-5 text-emerald-500" />
+                          {language === 'en' ? 'Downloads & Resources' : language === 'ur' ? 'ڈاؤن لوڈ اور وسائل' : 'ڊائون لوڊ ۽ وسيلا'}
                         </h3>
-                        {saint.pdfUrlEn ? (
-                          <a href={saint.pdfUrlEn} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-emerald-600 hover:bg-emerald-700">
-                              <Download className="mr-2 h-4 w-4" />
-                              {language === 'en' ? 'Download PDF' : language === 'ur' ? 'پی ڈی ایف ڈاؤن لوڈ' : 'پي ڊي ايف ڊائون لوڊ'}
-                            </Button>
-                          </a>
-                        ) : (
-                          <Button className="bg-gray-400 cursor-not-allowed" disabled>
-                            <Download className="mr-2 h-4 w-4" />
-                            {language === 'en' ? 'Coming Soon' : language === 'ur' ? 'جلد آرہا ہے' : 'جلد اچي رهيو آهي'}
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-blue-50 border-blue-200">
-                      <CardContent className="p-6 text-center">
-                        <h3 className="font-bold mb-2 text-blue-800">
-                          {language === 'en' ? 'Urdu Version' : language === 'ur' ? 'اردو ورژن' : 'اردو ورزن'}
-                        </h3>
-                        {saint.pdfUrlUr ? (
-                          <a href={saint.pdfUrlUr} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-blue-600 hover:bg-blue-700">
-                              <Download className="mr-2 h-4 w-4" />
-                              {language === 'en' ? 'Download PDF' : language === 'ur' ? 'پی ڈی ایف ڈاؤن لوڈ' : 'پي ڊي ايف ڊائون لوڊ'}
-                            </Button>
-                          </a>
-                        ) : (
-                          <Button className="bg-gray-400 cursor-not-allowed" disabled>
-                            <Download className="mr-2 h-4 w-4" />
-                            {language === 'en' ? 'Coming Soon' : language === 'ur' ? 'جلد آرہا ہے' : 'جلد اچي رهيو آهي'}
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-purple-50 border-purple-200">
-                      <CardContent className="p-6 text-center">
-                        <h3 className="font-bold mb-2 text-purple-800">
-                          {language === 'en' ? 'Sindhi Version' : language === 'ur' ? 'سندھی ورژن' : 'سنڌي ورزن'}
-                        </h3>
-                        {saint.pdfUrlSd ? (
-                          <a href={saint.pdfUrlSd} target="_blank" rel="noopener noreferrer">
-                            <Button className="bg-purple-600 hover:bg-purple-700">
-                              <Download className="mr-2 h-4 w-4" />
-                              {language === 'en' ? 'Download PDF' : language === 'ur' ? 'پی ڈی ایف ڈاؤن لوڈ' : 'پي ڊي ايف ڊائون لوڊ'}
-                            </Button>
-                          </a>
-                        ) : (
-                          <Button className="bg-gray-400 cursor-not-allowed" disabled>
-                            <Download className="mr-2 h-4 w-4" />
-                            {language === 'en' ? 'Coming Soon' : language === 'ur' ? 'جلد آرہا ہے' : 'جلد اچي رهيو آهي'}
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+
+                        <div className="grid sm:grid-cols-3 gap-4">
+                          {/* PDF Buttons */}
+                          {[
+                            { lang: 'English', code: 'En', labelEn: 'English PDF', labelUr: 'انگریزی پی ڈی ایف', labelSd: 'انگريزي پي ڊي ايف', url: saint.pdfUrlEn, color: 'emerald' },
+                            { lang: 'Urdu', code: 'Ur', labelEn: 'Urdu PDF', labelUr: 'اردو پی ڈی ایف', labelSd: 'اردو پي ڊي ايف', url: saint.pdfUrlUr, color: 'blue' },
+                            { lang: 'Sindhi', code: 'Sd', labelEn: 'Sindhi PDF', labelUr: 'سندھی پی ڈی ایف', labelSd: 'سنڌي پي ڊي ايف', url: saint.pdfUrlSd, color: 'purple' }
+                          ].map((item) => (
+                            <div key={item.code} className="group relative">
+                              {item.url ? (
+                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                                  <div className={`p-4 rounded-xl border transition-all duration-300 hover:shadow-md cursor-pointer 
+                                      ${item.color === 'emerald' ? 'bg-emerald-50 border-emerald-100 hover:border-emerald-300' :
+                                      item.color === 'blue' ? 'bg-blue-50 border-blue-100 hover:border-blue-300' :
+                                        'bg-purple-50 border-purple-100 hover:border-purple-300'}`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className={`text-xs font-bold uppercase tracking-wider 
+                                          ${item.color === 'emerald' ? 'text-emerald-600' :
+                                          item.color === 'blue' ? 'text-blue-600' :
+                                            'text-purple-600'}`}>
+                                        {item.lang}
+                                      </span>
+                                      <Download className={`h-4 w-4 opacity-50 
+                                          ${item.color === 'emerald' ? 'text-emerald-600' :
+                                          item.color === 'blue' ? 'text-blue-600' :
+                                            'text-purple-600'}`} />
+                                    </div>
+                                    <div className={`font-semibold ${isRTL ? 'text-right' : 'text-left'} 
+                                         ${item.color === 'emerald' ? 'text-emerald-900 cover' :
+                                        item.color === 'blue' ? 'text-blue-900' :
+                                          'text-purple-900'}`}>
+                                      {language === 'en' ? item.labelEn : language === 'ur' ? item.labelUr : item.labelSd}
+                                    </div>
+                                  </div>
+                                </a>
+                              ) : (
+                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50 opacity-60">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                      {item.lang}
+                                    </span>
+                                    <Download className="h-4 w-4 text-slate-300" />
+                                  </div>
+                                  <div className={`font-semibold text-slate-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    {language === 'en' ? 'Coming Soon' : language === 'ur' ? 'جلد آرہا ہے' : 'جلد اچي رهيو آهي'}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            ))}
+          </div>
         </Tabs>
       </div>
     </div>
