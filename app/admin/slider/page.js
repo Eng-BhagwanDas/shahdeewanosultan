@@ -15,7 +15,7 @@ export default function SliderManagement() {
   const [uploadStatus, setUploadStatus] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const fileInputRef = useRef(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     imageUrl: '',
@@ -170,7 +170,7 @@ export default function SliderManagement() {
                   />
                 </div>
               </div>
-              
+
               {/* Image Upload Section */}
               <div className="space-y-3">
                 <Label>Slider Image</Label>
@@ -182,12 +182,12 @@ export default function SliderManagement() {
                     className="hidden"
                     onChange={handleFileUpload}
                   />
-                  
+
                   {previewUrl ? (
                     <div className="relative">
-                      <img 
-                        src={previewUrl} 
-                        alt="Preview" 
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
                         className="max-h-48 mx-auto rounded-lg object-contain"
                       />
                       <Button
@@ -220,7 +220,7 @@ export default function SliderManagement() {
                     </div>
                   )}
                 </div>
-                
+
                 {uploadStatus && (
                   <p className={`text-sm ${uploadStatus.includes('✓') ? 'text-green-600' : 'text-red-600'}`}>
                     {uploadStatus}
@@ -231,11 +231,11 @@ export default function SliderManagement() {
                 <Input
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="https://example.com/slide-image.jpg"
-                  type="url"
+                  placeholder="/uploads/image.jpg or https://example.com/image.jpg"
+                  type="text"
                 />
               </div>
-              
+
               <div className="flex space-x-3">
                 <Button type="submit" disabled={loading || !formData.imageUrl} className="bg-emerald-600 hover:bg-emerald-700">
                   {loading ? 'Adding...' : 'Add Slide'}
