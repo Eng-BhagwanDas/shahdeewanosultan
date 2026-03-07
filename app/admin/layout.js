@@ -69,9 +69,8 @@ export default function AdminLayout({ children }) {
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 bg-gradient-to-b from-emerald-900 to-emerald-800 text-white`}
+        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 bg-gradient-to-b from-emerald-900 to-emerald-800 text-white`}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -95,9 +94,8 @@ export default function AdminLayout({ children }) {
                 <Link key={item.href} href={item.href}>
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start ${
-                      isActive ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-emerald-700/50'
-                    }`}
+                    className={`w-full justify-start ${isActive ? 'bg-emerald-700 text-white' : 'text-emerald-100 hover:bg-emerald-700/50'
+                      }`}
                   >
                     <item.icon className="mr-2 h-4 w-4" />
                     {item.name}
@@ -139,8 +137,8 @@ export default function AdminLayout({ children }) {
       </div>
 
       {/* Main content */}
-      <main className="lg:ml-64 min-h-screen">
-        <div className="p-6 lg:p-8">{children}</div>
+      <main className="lg:ml-64 min-h-screen transition-all">
+        <div className="p-4 sm:p-6 lg:p-8 mt-14 lg:mt-0">{children}</div>
       </main>
 
       {/* Overlay for mobile */}

@@ -263,17 +263,20 @@ export default function SliderManagement() {
           ) : (
             <div className="space-y-4">
               {slides.map((slide) => (
-                <div key={slide.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="bg-emerald-100 w-12 h-12 rounded flex items-center justify-center flex-shrink-0">
-                    <span className="text-emerald-800 font-bold text-lg">{slide.order}</span>
+                <div key={slide.id} className="flex flex-col sm:flex-row items-start sm:items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow gap-4">
+                  <div className="flex items-center space-x-4 w-full sm:w-auto">
+                    <div className="bg-emerald-100 w-12 h-12 rounded flex items-center justify-center flex-shrink-0">
+                      <span className="text-emerald-800 font-bold text-lg">{slide.order}</span>
+                    </div>
+                    <img src={slide.imageUrl} alt={slide.title || 'Slide'} className="w-24 sm:w-40 h-16 sm:h-24 object-cover rounded" />
                   </div>
-                  <img src={slide.imageUrl} alt={slide.title || 'Slide'} className="w-40 h-24 object-cover rounded" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{slide.title || 'Untitled Slide'}</h3>
+                  <div className="flex-1 w-full sm:w-auto min-w-0">
+                    <h3 className="font-semibold text-gray-900 truncate">{slide.title || 'Untitled Slide'}</h3>
                     <p className="text-sm text-gray-500 truncate">{slide.imageUrl}</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(slide.id)} className="text-red-600 hover:text-red-700">
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(slide.id)} className="text-red-600 hover:text-red-700 w-full sm:w-auto mt-2 sm:mt-0">
+                    <Trash2 className="h-4 w-4 mr-2 sm:mr-0" />
+                    <span className="sm:hidden">Delete</span>
                   </Button>
                 </div>
               ))}

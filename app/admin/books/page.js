@@ -410,9 +410,9 @@ export default function BooksManagement() {
               {books.map((book) => (
                 <div
                   key={book.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow gap-4"
                 >
-                  <div className="flex items-start space-x-4 flex-1">
+                  <div className="flex items-start space-x-4 w-full sm:w-auto flex-1">
                     <div className="bg-gradient-to-br from-emerald-600 to-teal-600 w-12 h-14 rounded flex items-center justify-center flex-shrink-0">
                       <FileText className="h-6 w-6 text-white" />
                     </div>
@@ -432,7 +432,7 @@ export default function BooksManagement() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 w-full sm:w-auto justify-end sm:justify-start">
                     {book.pdfUrl && (
                       <a href={book.pdfUrl} target="_blank" rel="noopener noreferrer">
                         <Button variant="outline" size="sm">

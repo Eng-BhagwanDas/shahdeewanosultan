@@ -174,9 +174,9 @@ export default function EventsPage() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/30 flex items-center justify-center">
-          <div className="text-center text-white">
-            <CalendarIcon className="h-16 w-16 mx-auto mb-4" />
-            <h1 className="text-4xl md:text-5xl font-bold">{t.title}</h1>
+          <div className="text-center text-white px-4">
+            <CalendarIcon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">{t.title}</h1>
           </div>
         </div>
       </div>
@@ -206,8 +206,8 @@ export default function EventsPage() {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                      <p className="text-gray-600 mb-4">{event.description}</p>
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">{event.description}</p>
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex items-center">
                           <CalendarIcon className="h-4 w-4 mr-2 text-emerald-600" />

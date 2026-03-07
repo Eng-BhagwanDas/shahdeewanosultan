@@ -170,10 +170,10 @@ export default function AudioPage() {
       <div className="relative h-64 overflow-hidden">
         <img src="https://images.unsplash.com/photo-1542414110-ae27fdb87ee1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2MDAwOTQ5Mnww&ixlib=rb-4.1.0&q=85" alt="Audio" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/30 flex items-center justify-center">
-          <div className="text-center text-white">
-            <Music className="h-16 w-16 mx-auto mb-4" />
-            <h1 className="text-4xl md:text-5xl font-bold">{t.title}</h1>
-            <p className="text-xl mt-2">{t.subtitle}</p>
+          <div className="text-center text-white px-4">
+            <Music className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4" />
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">{t.title}</h1>
+            <p className="text-lg sm:text-xl mt-2">{t.subtitle}</p>
           </div>
         </div>
       </div>
@@ -215,11 +215,11 @@ export default function AudioPage() {
                       <div className={`w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 ${bgColor}`}>
                         <Music className="h-8 w-8 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">{t[audio.category] || audio.category}</span>
-                        <h3 className="text-lg font-bold text-gray-900 mt-2">{audio.title}</h3>
-                        {audio.artist && <p className="text-sm text-emerald-600">{audio.artist}</p>}
-                        {audio.description && <p className="text-sm text-gray-600 mt-1">{audio.description}</p>}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded inline-block mb-1">{t[audio.category] || audio.category}</span>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mt-1 truncate">{audio.title}</h3>
+                        {audio.artist && <p className="text-sm text-emerald-600 truncate">{audio.artist}</p>}
+                        {audio.description && <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">{audio.description}</p>}
                         {renderAudioPlayer(audio.audioUrl)}
                       </div>
                     </div>

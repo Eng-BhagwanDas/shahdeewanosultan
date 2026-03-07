@@ -430,17 +430,17 @@ export default function SaintsManagement() {
           ) : (
             <div className="space-y-4">
               {saints.sort((a, b) => (a.order || 0) - (b.order || 0)).map((saint) => (
-                <div key={saint.id} className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex items-start space-x-4 flex-1">
+                <div key={saint.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow gap-4">
+                  <div className="flex items-start space-x-4 w-full sm:w-auto flex-1">
                     <div className="bg-emerald-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-emerald-800 font-bold">{saint.order || '?'}</span>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{saint.saintId || saint.id}</span>
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded truncate">{saint.saintId || saint.id}</span>
                       </div>
-                      <h3 className="font-semibold text-gray-900 text-lg">{saint.name}</h3>
-                      {saint.title && <p className="text-sm text-emerald-600">{saint.title}</p>}
+                      <h3 className="font-semibold text-gray-900 text-lg truncate">{saint.name}</h3>
+                      {saint.title && <p className="text-sm text-emerald-600 truncate">{saint.title}</p>}
                       <p className="text-sm text-gray-600 mt-1 line-clamp-2">{saint.content}</p>
                       <div className="flex space-x-3 mt-2">
                         {saint.pdfUrl && (
@@ -466,7 +466,7 @@ export default function SaintsManagement() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 w-full sm:w-auto justify-end sm:justify-start">
                     <Button variant="outline" size="sm" onClick={() => handleEdit(saint.saintId || saint.id)} className="text-blue-600 hover:text-blue-700">
                       <Pencil className="h-4 w-4" />
                     </Button>

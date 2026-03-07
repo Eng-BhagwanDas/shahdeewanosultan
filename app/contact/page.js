@@ -167,8 +167,8 @@ export default function ContactPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Contact Form */}
-          <Card>
-            <CardContent className="p-6">
+          <Card className="order-2 md:order-1">
+            <CardContent className="p-4 sm:p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.send}</h2>
               {success && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -226,9 +226,9 @@ export default function ContactPage() {
           </Card>
 
           {/* Contact Information */}
-          <div className="space-y-6">
+          <div className="space-y-6 order-1 md:order-2">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.contactInfo}</h2>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-4">

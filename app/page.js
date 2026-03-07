@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Menu, 
-  X, 
-  ChevronLeft, 
+import {
+  Menu,
+  X,
+  ChevronLeft,
   ChevronRight,
   Globe,
   Phone,
@@ -346,16 +346,16 @@ export default function Home() {
       </nav>
 
       {/* Marquee Headline */}
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap">
-          <span className="text-lg font-semibold mx-8">☪ {t.welcomeTitle} - {t.welcomeSubtitle}</span>
-          <span className="text-lg font-semibold mx-8">☪ {t.upcomingEvents}: {t.ursMubarak}</span>
-          <span className="text-lg font-semibold mx-8">☪ {t.visitUs}</span>
+      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-2 overflow-hidden w-full">
+        <div className="animate-marquee whitespace-nowrap inline-block">
+          <span className="text-sm md:text-lg font-semibold mx-4 md:mx-8">☪ {t.welcomeTitle} - {t.welcomeSubtitle}</span>
+          <span className="text-sm md:text-lg font-semibold mx-4 md:mx-8">☪ {t.upcomingEvents}: {t.ursMubarak}</span>
+          <span className="text-sm md:text-lg font-semibold mx-4 md:mx-8">☪ {t.visitUs}</span>
         </div>
       </div>
 
       {/* Hero Slider */}
-      <div className="relative h-[500px] md:h-[600px] overflow-hidden">
+      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden w-full">
         {sliderImages.map((image, index) => (
           <div
             key={index}
@@ -367,40 +367,40 @@ export default function Home() {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <div className="text-center text-white px-4">
-                <h2 className="text-4xl md:text-6xl font-bold mb-4">{t.welcomeTitle}</h2>
-                <p className="text-xl md:text-2xl mb-8">{t.welcomeSubtitle}</p>
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700">
+              <div className="text-center text-white px-2 sm:px-4 w-full max-w-4xl mx-auto">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-4">{t.welcomeTitle}</h2>
+                <p className="text-sm sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-8">{t.welcomeSubtitle}</p>
+                <Button size="sm" className="sm:h-11 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-xs sm:text-base">
                   {t.visitUs}
                 </Button>
               </div>
             </div>
           </div>
         ))}
-        
+
         <Button
           variant="ghost"
           size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white h-8 w-8 sm:h-12 sm:w-12"
           onClick={prevSlide}
         >
-          <ChevronLeft className="h-8 w-8" />
+          <ChevronLeft className="h-5 w-5 sm:h-8 sm:w-8" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white h-8 w-8 sm:h-12 sm:w-12"
           onClick={nextSlide}
         >
-          <ChevronRight className="h-8 w-8" />
+          <ChevronRight className="h-5 w-5 sm:h-8 sm:w-8" />
         </Button>
-        
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex space-x-1.5 sm:space-x-2">
           {sliderImages.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${index === currentSlide ? 'bg-white w-8' : 'bg-white/50'}`}
+              className={`h-2 sm:h-3 rounded-full transition-all ${index === currentSlide ? 'bg-white w-6 sm:w-8' : 'bg-white/50 w-2 sm:w-3'}`}
             />
           ))}
         </div>
@@ -421,7 +421,7 @@ export default function Home() {
                 </CardContent>
               </Card>
             );
-            
+
             return link.href?.startsWith('/') ? (
               <Link key={link.key} href={link.href}>
                 {cardContent}
@@ -443,8 +443,8 @@ export default function Home() {
               />
             </div>
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-emerald-800">{t.introduction}</h2>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-emerald-800">{t.introduction}</h2>
+              <p className="text-base sm:text-lg text-gray-700 mb-6 leading-relaxed">
                 {language === 'en' && 'Welcome to the sacred Dargah of Hazrat Shah Deewano Sultan, a place of spiritual enlightenment and divine blessings. This holy shrine has been a beacon of faith and devotion for generations.'}
                 {language === 'ur' && 'حضرت شاہ دیوانو سلطان کی مقدس درگاہ میں خوش آمدید، یہ روحانی روشنی اور الہی برکتوں کا مقام ہے۔ یہ مقدس مزار نسلوں سے ایمان اور عقیدت کی روشنی ہے۔'}
                 {language === 'sd' && 'حضرت شاهه ديوانو سلطان جي مقدس درگاهه ۾ ڀلي ڪري آيا، هي روحاني روشني ۽ خدائي برڪتن جو جاءُ آهي۔ هي مقدس مزار نسلن کان ايمان ۽ عقيدت جي روشني آهي۔'}

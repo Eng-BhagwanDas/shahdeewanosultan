@@ -295,9 +295,9 @@ export default function EventsManagement() {
               {events.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow gap-4"
                 >
-                  <div className="flex items-start space-x-4 flex-1">
+                  <div className="flex items-start space-x-4 w-full sm:w-auto flex-1">
                     <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white flex-shrink-0">
                       <span className="text-2xl font-bold">{new Date(event.date).getDate()}</span>
                       <span className="text-xs">
@@ -318,9 +318,10 @@ export default function EventsManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(event.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 w-full sm:w-auto self-end sm:self-auto"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 sm:mr-2" />
+                    <span className="sm:hidden">Delete Event</span>
                   </Button>
                 </div>
               ))}
