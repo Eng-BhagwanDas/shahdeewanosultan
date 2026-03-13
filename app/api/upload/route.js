@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/lib/supabase';
 
 // Helper to handle CORS
 function corsHeaders() {
@@ -50,30 +49,38 @@ export async function POST(request) {
     // Create unique filename
     const ext = path.extname(file.name);
     const filename = `${uuidv4()}${ext}`;
-    
-    // Determine upload directory
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', type);
-    
-    // Ensure directory exists
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
+
+    // File path within the Supabase 'uploads' bucket
+    const filePath = `${type}/${filename}`;
 
     // Get file buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Write file
-    const filePath = path.join(uploadDir, filename);
-    await writeFile(filePath, buffer);
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('uploads')
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        upsert: false
+      });
 
-    // Return the public URL
-    const fileUrl = `/uploads/${type}/${filename}`;
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      throw new Error(`Failed to upload to storage: ${uploadError.message}`);
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase
+      .storage
+      .from('uploads')
+      .getPublicUrl(filePath);
 
     return NextResponse.json(
-      { 
-        success: true, 
-        url: fileUrl,
+      {
+        success: true,
+        url: publicUrl,
         filename: filename,
         originalName: file.name,
         size: file.size,
