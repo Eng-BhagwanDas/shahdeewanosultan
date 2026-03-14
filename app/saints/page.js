@@ -170,33 +170,74 @@ export default function SaintsPage() {
 
         const newSaintsData = { ...defaultSaintsData };
 
-        // Process English saints
-        if (enData.saints && enData.saints.length > 0) {
-          newSaintsData.en = enData.saints.map((saint, index) => ({
-            id: saint.saintId || saint.id || `saint${index + 1}`,
-            name: saint.name,
-            title: saint.title,
-            content: saint.content || saint.biography || '',
-            pdfUrlEn: saint.pdfUrl || '',
-            pdfUrlUr: saint.pdfUrlUr || '',
-            pdfUrlSd: saint.pdfUrlSd || '',
-            imageUrl: saint.imageUrl || '',
-          }));
-        }
+        // Helper function to merge API data with default data
+        const mergeSaintsData = (defaultSaints, apiSaints) => {
+          if (!apiSaints || apiSaints.length === 0) return defaultSaints;
+          
+          const merged = [...defaultSaints];
+          const matchedApiIds = new Set();
 
-        // Process Urdu saints
-        if (urData.saints && urData.saints.length > 0) {
-          newSaintsData.ur = urData.saints.map((saint, index) => ({
-            id: saint.saintId || saint.id || `saint${index + 1}`,
-            name: saint.name,
-            title: saint.title,
-            content: saint.content || saint.biography || '',
-            pdfUrlEn: saint.pdfUrlEn || '',
-            pdfUrlUr: saint.pdfUrl || '',
-            pdfUrlSd: saint.pdfUrlSd || '',
-            imageUrl: saint.imageUrl || '',
-          }));
-        }
+          // Update existing defaults with API data
+          const processedDefaults = merged.map((defaultSaint) => {
+            const apiSaint = apiSaints.find(
+              (s) => s.id === defaultSaint.id || s.saintId === defaultSaint.id
+            );
+            if (apiSaint) {
+              matchedApiIds.add(apiSaint.id || apiSaint.saintId);
+              return {
+                id: apiSaint.saintId || apiSaint.id,
+                name: apiSaint.name || defaultSaint.name,
+                title: apiSaint.title || defaultSaint.title,
+                content: apiSaint.content || apiSaint.biography || defaultSaint.content,
+                pdfUrlEn: apiSaint.pdfUrlEn || apiSaint.pdfUrl || defaultSaint.pdfUrlEn,
+                pdfUrlUr: apiSaint.pdfUrlUr || defaultSaint.pdfUrlUr,
+                pdfUrlSd: apiSaint.pdfUrlSd || defaultSaint.pdfUrlSd,
+                imageUrl: apiSaint.imageUrl || defaultSaint.imageUrl || '',
+                order: apiSaint.order || defaultSaint.order || 99,
+              };
+            }
+            return defaultSaint;
+          });
+
+          // Add any completely new saints from the API that aren't in defaults
+          const newApiSaints = apiSaints
+            .filter((s) => !matchedApiIds.has(s.id) && !matchedApiIds.has(s.saintId))
+            .map((apiSaint, idx) => ({
+              id: apiSaint.saintId || apiSaint.id || `new_saint_${idx}`,
+              name: apiSaint.name,
+              title: apiSaint.title,
+              content: apiSaint.content || apiSaint.biography || '',
+              pdfUrlEn: apiSaint.pdfUrlEn || apiSaint.pdfUrl || '',
+              pdfUrlUr: apiSaint.pdfUrlUr || '',
+              pdfUrlSd: apiSaint.pdfUrlSd || '',
+              imageUrl: apiSaint.imageUrl || '',
+              order: apiSaint.order || 100 + idx,
+            }));
+
+          const combined = [...processedDefaults, ...newApiSaints];
+          // Sort by order 
+          return combined.sort((a, b) => (a.order || 99) - (b.order || 99));
+        };
+
+        newSaintsData.en = mergeSaintsData(defaultSaintsData.en, enData.saints);
+        
+        // For Urdu, the API returns the generic pdfUrl which might shadow pdfUrlUr, handling it in mergeSaintsData
+        newSaintsData.ur = mergeSaintsData(defaultSaintsData.ur, urData.saints).map(s => {
+          const apiMatch = urData.saints?.find(db => db.id === s.id || db.saintId === s.id);
+          if (apiMatch) {
+             s.pdfUrlUr = apiMatch.pdfUrlUr || apiMatch.pdfUrl || s.pdfUrlUr;
+          }
+          return s;
+        });
+
+        // For Sindhi
+        newSaintsData.sd = mergeSaintsData(defaultSaintsData.sd, sdData.saints).map(s => {
+          const apiMatch = sdData.saints?.find(db => db.id === s.id || db.saintId === s.id);
+          if (apiMatch) {
+             s.pdfUrlSd = apiMatch.pdfUrlSd || apiMatch.pdfUrl || s.pdfUrlSd;
+          }
+          return s;
+        });
 
         // Process Sindhi saints
         if (sdData.saints && sdData.saints.length > 0) {
