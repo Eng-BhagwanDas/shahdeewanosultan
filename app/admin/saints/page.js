@@ -106,7 +106,6 @@ export default function SaintsManagement() {
       for (const lang of languages) {
         const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
         const saintData = {
-          saintId: formData.saintId,
           // Use 'id' for the backend to identify the document
           id: formData.saintId,
           name: formData[`name${langKey}`],
