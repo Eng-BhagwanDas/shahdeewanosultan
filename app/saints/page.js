@@ -239,20 +239,6 @@ export default function SaintsPage() {
           return s;
         });
 
-        // Process Sindhi saints
-        if (sdData.saints && sdData.saints.length > 0) {
-          newSaintsData.sd = sdData.saints.map((saint, index) => ({
-            id: saint.saintId || saint.id || `saint${index + 1}`,
-            name: saint.name,
-            title: saint.title,
-            content: saint.content || saint.biography || '',
-            pdfUrlEn: saint.pdfUrlEn || '',
-            pdfUrlUr: saint.pdfUrlUr || '',
-            pdfUrlSd: saint.pdfUrl || '',
-            imageUrl: saint.imageUrl || '',
-          }));
-        }
-
         setSaintsData(newSaintsData);
       } catch (error) {
         console.error('Failed to fetch saints:', error);
