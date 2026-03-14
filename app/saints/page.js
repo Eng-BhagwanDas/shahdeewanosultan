@@ -354,7 +354,7 @@ export default function SaintsPage() {
                 )}
               >
                 <span className={cn(
-                  "font-bold text-base md:text-lg line-clamp-2 w-full",
+                  "font-bold text-sm md:text-base line-clamp-2 w-full",
                   "data-[state=active]:text-emerald-800 text-slate-600"
                 )}>
                   {saint.name}
@@ -392,10 +392,10 @@ export default function SaintsPage() {
                         <div className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase bg-emerald-500/90 rounded-full backdrop-blur-md">
                           {language === 'en' ? 'Noble Saint' : language === 'ur' ? 'عظیم بزرگ' : 'عظيم بزرگ'}
                         </div>
-                        <h2 className={`font-bold text-3xl md:text-5xl leading-tight mb-2 ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
+                        <h2 className={`font-bold text-2xl md:text-4xl leading-tight mb-2 ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
                           {saint.name}
                         </h2>
-                        <p className="text-emerald-100 text-lg font-medium">{saint.title}</p>
+                        <p className="text-emerald-100 text-base md:text-lg font-medium">{saint.title}</p>
                       </div>
                     </div>
 
