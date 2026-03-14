@@ -388,14 +388,14 @@ export default function SaintsPage() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                      <div className="absolute bottom-0 left-0 p-8 text-white">
-                        <div className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase bg-emerald-500/90 rounded-full backdrop-blur-md">
+                      <div className={`absolute bottom-0 ${isRTL ? 'right-0 text-right' : 'left-0 text-left'} p-6 md:p-8 text-white w-full md:max-w-[85%]`}>
+                        <div className="inline-block px-3 py-1 mb-3 lg:mb-4 text-xs font-bold tracking-wider uppercase bg-emerald-500/90 rounded-full backdrop-blur-md shadow-sm">
                           {language === 'en' ? 'Noble Saint' : language === 'ur' ? 'عظیم بزرگ' : 'عظيم بزرگ'}
                         </div>
-                        <h2 className={`font-bold text-2xl md:text-4xl leading-tight mb-2 ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
+                        <h2 className={`font-bold text-2xl md:text-4xl leading-snug md:leading-tight mb-3 lg:mb-4 drop-shadow-lg ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
                           {saint.name}
                         </h2>
-                        <p className="text-emerald-100 text-base md:text-lg font-medium">{saint.title}</p>
+                        <p className="text-emerald-50 text-base md:text-lg font-medium drop-shadow-md pb-2 md:pb-0">{saint.title}</p>
                       </div>
                     </div>
 
