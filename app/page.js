@@ -486,19 +486,19 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="text-xl font-bold mb-4">{t.visitUs}</h3>
-              <div className="space-y-2">
-                <div className="flex items-start">
-                  <MapPin className="h-5 w-5 mr-2 mt-1" />
-                  <span>{t.address}</span>
-                </div>
-                <div className="flex items-center">
-                  <Phone className="h-5 w-5 mr-2" />
+              <div className="space-y-4">
+                <a href="https://www.google.com/maps/place/Shrine+of+Shah+Deewano+Sultan./@25.0509363,68.8409216,17z/data=!3m1!4b1!4m6!3m5!1s0x394c2624a69d24ed:0x8a9c8643fa361994!8m2!3d25.0509363!4d68.8409216!16s%2Fg%2F12hl0mzf1?entry=ttu&g_ep=EgoyMDI2MDMxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="flex items-start hover:text-emerald-200 transition-colors block">
+                  <MapPin className="h-5 w-5 mr-3 mt-1 shrink-0" />
+                  <span className="leading-relaxed">{t.address}</span>
+                </a>
+                <a href="https://wa.me/923138883646" target="_blank" rel="noopener noreferrer" className="flex items-center hover:text-emerald-200 transition-colors block">
+                  <Phone className="h-5 w-5 mr-3 shrink-0" />
                   <span>{t.phone}</span>
-                </div>
-                <div className="flex items-center">
-                  <Mail className="h-5 w-5 mr-2" />
+                </a>
+                <a href="mailto:info@dargah.com" className="flex items-center hover:text-emerald-200 transition-colors block">
+                  <Mail className="h-5 w-5 mr-3 shrink-0" />
                   <span>{t.email}</span>
-                </div>
+                </a>
               </div>
             </div>
             <div>

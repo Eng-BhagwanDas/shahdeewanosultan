@@ -231,33 +231,33 @@ export default function ContactPage() {
               <CardContent className="p-4 sm:p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.contactInfo}</h2>
                 <div className="space-y-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-emerald-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                  <a href="https://www.google.com/maps/place/Shrine+of+Shah+Deewano+Sultan./@25.0509363,68.8409216,17z/data=!3m1!4b1!4m6!3m5!1s0x394c2624a69d24ed:0x8a9c8643fa361994!8m2!3d25.0509363!4d68.8409216!16s%2Fg%2F12hl0mzf1?entry=ttu&g_ep=EgoyMDI2MDMxMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="flex items-start space-x-4 group block">
+                    <div className="bg-emerald-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 transition-colors">
                       <MapPin className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{t.address}</h3>
+                      <h3 className="font-semibold text-gray-900 group-hover:text-emerald-700 transition-colors">{t.address}</h3>
                       <p className="text-gray-600">{t.addressDetail}</p>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                  </a>
+                  <a href="https://wa.me/923138883646" target="_blank" rel="noopener noreferrer" className="flex items-start space-x-4 group block">
+                    <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
                       <Phone className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{t.phone}</h3>
+                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">{t.phone}</h3>
                       <p className="text-gray-600">{t.phoneNumber}</p>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                  </a>
+                  <a href="mailto:info@dargah.com" className="flex items-start space-x-4 group block">
+                    <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-purple-200 transition-colors">
                       <Mail className="h-6 w-6 text-purple-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{t.email}</h3>
+                      <h3 className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">{t.email}</h3>
                       <p className="text-gray-600">{t.emailAddress}</p>
                     </div>
-                  </div>
+                  </a>
                 </div>
               </CardContent>
             </Card>
