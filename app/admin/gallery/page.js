@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Image as ImageIcon, Upload, Loader2, CheckCircle, X, Layers, Link as LinkIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { uploadFile } from '@/app/actions/upload';
 
 export default function GalleryManagement() {
   const [images, setImages] = useState([]);
@@ -64,23 +65,18 @@ export default function GalleryManagement() {
     setUploading(true);
     setUploadStatus('');
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('type', 'gallery');
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'gallery');
 
-      const result = await response.json();
+      const result = await uploadFile(formDataUpload);
 
       if (result.success) {
         setFormData(prev => ({ ...prev, imageUrl: result.url }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
       alert(`Upload failed: ${error.message}`);
@@ -124,13 +120,9 @@ export default function GalleryManagement() {
         formDataUpload.append('file', fileObj.file);
         formDataUpload.append('type', 'gallery');
 
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formDataUpload,
-        });
-        const uploadResult = await uploadRes.json();
+        const uploadResult = await uploadFile(formDataUpload);
 
-        if (!uploadResult.success) throw new Error(uploadResult.error);
+        if (!uploadResult.success) throw new Error(uploadResult.error || 'Upload failed');
 
         // 2. Create Gallery Entry
         const galleryData = {

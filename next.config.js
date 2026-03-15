@@ -18,7 +18,6 @@ const nextConfig = {
     }
     return config;
   },
-  serverMaxBodySize: '50mb', // Some versions/deployments use this
   onDemandEntries: {
     maxInactiveAge: 10000,
     pagesBufferLength: 2,

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2, Users, Upload, Loader2, CheckCircle, Pencil } from 'lucide-react';
+import { uploadFile } from '@/app/actions/upload';
 
 const saintsList = [
   { id: 'saint1', nameEn: 'Hazrat Syed Sakhi Shah Deewano', order: 1 },
@@ -70,24 +71,19 @@ export default function SaintsManagement() {
     setUploading(prev => ({ ...prev, [lang]: true }));
     setUploadStatus(prev => ({ ...prev, [lang]: '' }));
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('type', 'books');
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'books');
 
-      const result = await response.json();
+      const result = await uploadFile(formDataUpload);
 
       if (result.success) {
         const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
         setFormData(prev => ({ ...prev, [`pdfUrl${langKey}`]: result.url }));
         setUploadStatus(prev => ({ ...prev, [lang]: `✓ ${file.name}` }));
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
       alert(`Upload failed: ${error.message}`);

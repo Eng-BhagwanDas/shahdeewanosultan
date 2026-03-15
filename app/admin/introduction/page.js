@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, Loader2, CheckCircle, Save } from 'lucide-react';
+import { uploadFile } from '@/app/actions/upload';
 
 export default function IntroductionManagement() {
   const [loading, setLoading] = useState(false);
@@ -97,17 +98,12 @@ export default function IntroductionManagement() {
     setUploading(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: true } }));
     setUploadStatus(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: '' } }));
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('type', 'books'); // store in books/documents folder in supabase
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'books'); // store in books/documents folder in supabase
 
-      const result = await response.json();
+      const result = await uploadFile(formDataUpload);
 
       if (result.success) {
         setFormData(prev => ({
@@ -119,7 +115,7 @@ export default function IntroductionManagement() {
         }));
         setUploadStatus(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: `✓ ${file.name}` } }));
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
       alert(`Upload failed: ${error.message}`);

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2, Music, Upload, Loader2, CheckCircle, Play } from 'lucide-react';
+import { uploadFile } from '@/app/actions/upload';
 
 const AUDIO_CATEGORIES = {
   en: [
@@ -73,43 +74,28 @@ export default function AudioManagement() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
 
-    const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
-    if (!allowedTypes.includes(file.type)) {
-      alert('Please select an audio file (MP3, WAV, OGG)');
+    // 50MB limit check in frontend
+    if (file.size > 50 * 1024 * 1024) {
+      alert('File is too large. Maximum allowed size is 50MB.');
       return;
     }
 
     setUploading(true);
     setUploadStatus('');
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('type', 'audio');
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'audio');
 
-      // Handle non-JSON responses (like 413 Request Entity Too Large)
-      const contentType = response.headers.get('content-type');
-      if (!response.ok) {
-        if (contentType && contentType.includes('application/json')) {
-          const result = await response.json();
-          throw new Error(result.error || `Server error: ${response.status}`);
-        } else {
-          const text = await response.text();
-          if (response.status === 413) {
-            throw new Error('The file is too large. Please try a smaller file (under 50MB).');
-          }
-          throw new Error(`Server error (${response.status}): ${text.slice(0, 100)}...`);
-        }
+      const result = await uploadFile(formDataUpload);
+
+      if (result.success) {
+        setFormData(prev => ({ ...prev, audioUrl: result.url }));
+        setUploadStatus(`✓ ${file.name} uploaded successfully`);
+      } else {
+        throw new Error(result.error || 'Upload failed');
       }
-
-      const result = await response.json();
-      setFormData(prev => ({ ...prev, audioUrl: result.url }));
-      setUploadStatus(`✓ ${file.name} uploaded successfully`);
     } catch (error) {
       alert(`Upload failed: ${error.message}`);
       setUploadStatus('Upload failed');

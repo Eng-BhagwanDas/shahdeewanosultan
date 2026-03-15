@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Sliders, Upload, Loader2, Image as ImageIcon, X } from 'lucide-react';
+import { uploadFile } from '@/app/actions/upload';
 
 export default function SliderManagement() {
   const [slides, setSlides] = useState([]);
@@ -56,23 +57,18 @@ export default function SliderManagement() {
     setUploading(true);
     setUploadStatus('');
 
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('type', 'slider');
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('type', 'slider');
 
-      const result = await response.json();
+      const result = await uploadFile(formDataUpload);
 
       if (result.success) {
         setFormData(prev => ({ ...prev, imageUrl: result.url }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
       alert(`Upload failed: ${error.message}`);
