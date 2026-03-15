@@ -437,7 +437,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://images.unsplash.com/photo-1542414110-ae27fdb87ee1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2MDAwOTQ5Mnww&ixlib=rb-4.1.0&q=85"
+                src="https://photos.app.goo.gl/1AfEJ3XwsvMgxWhq8"
                 alt="Islamic Pattern"
                 className="rounded-lg shadow-2xl"
               />
