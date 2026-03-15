@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Sliders, Upload, Loader2, Image as ImageIcon, X } from 'lucide-react';
-import { uploadFile } from '@/app/actions/upload';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function SliderManagement() {
   const [slides, setSlides] = useState([]);
@@ -58,23 +59,32 @@ export default function SliderManagement() {
     setUploadStatus('');
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'slider');
+      // Direct client-side upload to Supabase
+      const fileName = file.name.toLowerCase();
+      const ext = fileName.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `slider/${filename}`;
 
-      const result = await uploadFile(formDataUpload);
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!result) {
-        throw new Error('Server returned no response from upload action.');
-      }
+      if (uploadError) throw uploadError;
 
-      if (result.success) {
-        setFormData(prev => ({ ...prev, imageUrl: result.url }));
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (publicUrl) {
+        setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
-      } else {
-        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       alert(`Upload failed: ${error.message}`);
       setUploadStatus('Upload failed');
       setPreviewUrl('');

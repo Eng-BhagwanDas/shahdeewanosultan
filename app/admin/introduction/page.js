@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Loader2, CheckCircle, Save } from 'lucide-react';
-import { uploadFile } from '@/app/actions/upload';
+import { Trash2, Plus, Save, Loader2, FileText, Upload, Globe, Book, HandsPraying, History, CheckCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function IntroductionManagement() {
   const [loading, setLoading] = useState(false);
@@ -99,29 +100,38 @@ export default function IntroductionManagement() {
     setUploadStatus(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: '' } }));
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'books'); // store in books/documents folder in supabase
+      // Direct client-side upload to Supabase
+      const fileName = file.name.toLowerCase();
+      const ext = fileName.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `intro/${filename}`;
 
-      const result = await uploadFile(formDataUpload);
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!result) {
-        throw new Error('Server returned no response from upload action.');
-      }
+      if (uploadError) throw uploadError;
 
-      if (result.success) {
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (publicUrl) {
         setFormData(prev => ({
           ...prev,
           [lang]: {
             ...prev[lang],
-            [`${section}Pdf`]: result.url
+            [`${section}Pdf`]: publicUrl
           }
         }));
         setUploadStatus(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: `✓ ${file.name}` } }));
-      } else {
-        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       alert(`Upload failed: ${error.message}`);
       setUploadStatus(prev => ({ ...prev, [lang]: { ...prev[lang], [section]: 'Failed' } }));
     } finally {

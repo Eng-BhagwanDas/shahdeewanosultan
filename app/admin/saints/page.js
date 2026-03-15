@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Trash2, Users, Upload, Loader2, CheckCircle, Pencil } from 'lucide-react';
-import { uploadFile } from '@/app/actions/upload';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 const saintsList = [
   { id: 'saint1', nameEn: 'Hazrat Syed Sakhi Shah Deewano', order: 1 },
@@ -72,24 +73,33 @@ export default function SaintsManagement() {
     setUploadStatus(prev => ({ ...prev, [lang]: '' }));
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'books');
+      // Direct client-side upload to Supabase
+      const fileName = file.name.toLowerCase();
+      const ext = fileName.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `saints/${filename}`;
 
-      const result = await uploadFile(formDataUpload);
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!result) {
-        throw new Error('Server returned no response from upload action.');
-      }
+      if (uploadError) throw uploadError;
 
-      if (result.success) {
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (publicUrl) {
         const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
-        setFormData(prev => ({ ...prev, [`pdfUrl${langKey}`]: result.url }));
+        setFormData(prev => ({ ...prev, [`pdfUrl${langKey}`]: publicUrl }));
         setUploadStatus(prev => ({ ...prev, [lang]: `✓ ${file.name}` }));
-      } else {
-        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       alert(`Upload failed: ${error.message}`);
       setUploadStatus(prev => ({ ...prev, [lang]: 'Failed' }));
     } finally {

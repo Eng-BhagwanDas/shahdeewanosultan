@@ -1,4 +1,4 @@
-import { query, querySingle } from '@/lib/supabase';
+import { query, querySingle } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 

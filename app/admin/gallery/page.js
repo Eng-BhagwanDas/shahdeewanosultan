@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, Image as ImageIcon, Upload, Loader2, CheckCircle, X, Layers, Link as LinkIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { uploadFile } from '@/app/actions/upload';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function GalleryManagement() {
   const [images, setImages] = useState([]);
@@ -66,23 +67,32 @@ export default function GalleryManagement() {
     setUploadStatus('');
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'gallery');
+      // Direct client-side upload to Supabase
+      const fileName = file.name.toLowerCase();
+      const ext = fileName.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `gallery/${filename}`;
 
-      const result = await uploadFile(formDataUpload);
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!result) {
-        throw new Error('Server returned no response from upload action.');
-      }
+      if (uploadError) throw uploadError;
 
-      if (result.success) {
-        setFormData(prev => ({ ...prev, imageUrl: result.url }));
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      if (publicUrl) {
+        setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
-      } else {
-        throw new Error(result.error || 'Upload failed');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       alert(`Upload failed: ${error.message}`);
       setUploadStatus('Upload failed');
       setPreviewUrl('');
@@ -119,23 +129,30 @@ export default function GalleryManagement() {
       setBulkFiles(prev => prev.map(f => f.id === fileObj.id ? { ...f, status: 'uploading' } : f));
 
       try {
-        // 1. Upload File
-        const formDataUpload = new FormData();
-        formDataUpload.append('file', fileObj.file);
-        formDataUpload.append('type', 'gallery');
+        // Direct client-side upload to Supabase
+        const fileName = fileObj.file.name.toLowerCase();
+        const ext = fileName.split('.').pop();
+        const filename = `${uuidv4()}.${ext}`;
+        const filePath = `gallery/${filename}`;
 
-        const uploadResult = await uploadFile(formDataUpload);
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('uploads')
+          .upload(filePath, fileObj.file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (!uploadResult) {
-          throw new Error('Server returned no response from upload action during bulk process.');
-        }
+        if (uploadError) throw uploadError;
 
-        if (!uploadResult.success) throw new Error(uploadResult.error || 'Upload failed');
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('uploads')
+          .getPublicUrl(filePath);
 
         // 2. Create Gallery Entry
         const galleryData = {
           title: '', // Optional title
-          imageUrl: uploadResult.url,
+          imageUrl: publicUrl,
           category: bulkCategory
         };
 

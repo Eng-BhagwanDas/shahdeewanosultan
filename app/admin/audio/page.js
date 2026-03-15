@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, Music, Upload, Loader2, CheckCircle, Play } from 'lucide-react';
-import { uploadFile } from '@/app/actions/upload';
+import { Plus, Trash2, Headphones, Upload, Loader2, CheckCircle, X, Music } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 
 const AUDIO_CATEGORIES = {
   en: [
@@ -74,9 +75,13 @@ export default function AudioManagement() {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
 
-    // 50MB limit check in frontend
-    if (file.size > 50 * 1024 * 1024) {
-      alert('File is too large. Maximum allowed size is 50MB.');
+    // Small validation
+    const allowedExtensions = ['.mp3', '.wav', '.m4a', '.ogg'];
+    const fileName = file.name.toLowerCase();
+    const hasAllowedExt = allowedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!hasAllowedExt && !file.type.startsWith('audio/')) {
+      alert('Please select a valid audio file (MP3, WAV, M4A, OGG)');
       return;
     }
 
@@ -84,24 +89,31 @@ export default function AudioManagement() {
     setUploadStatus('');
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('type', 'audio');
+      // Direct client-side upload to Supabase
+      const ext = fileName.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `audio/${filename}`;
 
-      const result = await uploadFile(formDataUpload);
-      console.log('Upload Result:', result);
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (!result) {
-        throw new Error('Server returned no response. The file might be too large for the current timeout settings.');
-      }
+      if (uploadError) throw uploadError;
 
-      if (result.success) {
-        setFormData(prev => ({ ...prev, audioUrl: result.url }));
-        setUploadStatus(`✓ ${file.name} uploaded successfully`);
-      } else {
-        throw new Error(result.error || 'Upload failed');
-      }
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, audioUrl: publicUrl }));
+      setUploadStatus(`✓ ${file.name} uploaded successfully`);
+      
+      console.log('Upload Success:', publicUrl);
     } catch (error) {
+      console.error('Upload Error:', error);
       alert(`Upload failed: ${error.message}`);
       setUploadStatus('Upload failed');
     } finally {
