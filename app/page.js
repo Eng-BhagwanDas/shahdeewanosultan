@@ -132,6 +132,8 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRTL, setIsRTL] = useState(false);
   const [sliderImages, setSliderImages] = useState(defaultSliderImages);
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
 
   const t = translations[language];
 
@@ -152,6 +154,22 @@ export default function Home() {
     };
     fetchSlider();
   }, []);
+
+  // Fetch events from database
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`/api/events?language=${language}`);
+        const data = await response.json();
+        setEvents(data.events || []);
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [language]);
 
   useEffect(() => {
     setIsRTL(language === 'ur' || language === 'sd');
@@ -460,24 +478,46 @@ export default function Home() {
       {/* Events Section */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-emerald-800">{t.upcomingEvents}</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Calendar className="h-6 w-6 text-emerald-600 mr-2" />
-                  <span className="text-gray-600">Date: Coming Soon</span>
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">{t.ursMubarak}</h3>
-                <p className="text-gray-600">
-                  {language === 'en' && 'Annual Urs celebration with qawwali, ziyarat, and spiritual gatherings.'}
-                  {language === 'ur' && 'سالانہ عرس کی تقریب قوالی، زیارت اور روحانی اجتماعات کے ساتھ۔'}
-                  {language === 'sd' && 'سالانه عرس جو جشن قوالي، زيارت ۽ روحاني گڏجاڻين سان.'}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {eventsLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-emerald-600 border-t-transparent"></div>
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <Calendar className="mx-auto h-12 w-12 mb-4 opacity-20" />
+            <p>{language === 'en' ? 'No upcoming events' : language === 'ur' ? 'کوئی آئندہ تقریب نہیں' : 'ڪو به ايندڙ واقعو ناهي'}</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {events.slice(0, 3).map((event) => (
+              <Card key={event.id} className="hover:shadow-xl transition-all hover:-translate-y-1 duration-300 border-t-4 border-t-emerald-600">
+                <CardContent className="p-6">
+                  <div className="flex items-center mb-4 text-emerald-700">
+                    <Calendar className="h-5 w-5 mr-2" />
+                    <span className="font-medium">
+                      {language === 'en' ? 'Date: ' : language === 'ur' ? 'تاریخ: ' : 'تاريخ: '}
+                      {new Date(event.date).toLocaleDateString(language === 'en' ? 'en-US' : language === 'ur' ? 'ur-PK' : 'sd-PK', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">{event.title}</h3>
+                  <p className="text-gray-600 line-clamp-3 leading-relaxed">
+                    {event.description}
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm">
+                    <span className="text-emerald-600 font-medium">Read More →</span>
+                    <Link href="/events" className="text-gray-400 hover:text-emerald-600 transition-colors">
+                      View Details
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
