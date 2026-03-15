@@ -196,8 +196,17 @@ export default function EventsPage() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {events.map((event) => (
-              <Card key={event.id} className="hover:shadow-xl transition-shadow overflow-hidden">
-                <CardContent className="p-6">
+              <Card key={event.id} className="hover:shadow-xl transition-shadow overflow-hidden flex flex-col">
+                {event.imageUrl && (
+                  <div className="h-48 w-full overflow-hidden">
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
+                    />
+                  </div>
+                )}
+                <CardContent className="p-6 flex-1 flex flex-col">
                   <div className="flex items-start space-x-4 mb-4">
                     <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white flex-shrink-0">
                       <span className="text-2xl font-bold">{new Date(event.date).getDate()}</span>

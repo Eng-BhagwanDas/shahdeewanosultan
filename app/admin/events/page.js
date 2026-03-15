@@ -7,7 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Trash2, Calendar, Edit } from 'lucide-react';
+import { Plus, Trash2, Calendar, Upload, Loader2, CheckCircle, MapPin, Clock, ImageIcon, X } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
+import { useMemo } from 'react';
 
 export default function EventsManagement() {
   const [events, setEvents] = useState([]);
@@ -26,7 +29,11 @@ export default function EventsManagement() {
     locationUr: '',
     locationSd: '',
     mapUrl: '', // Google Maps link
+    imageUrl: '',
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   useEffect(() => {
     fetchEvents();
@@ -34,11 +41,52 @@ export default function EventsManagement() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events?language=en');
+      const response = await fetch('/api/events');
       const data = await response.json();
       setEvents(data.events || []);
     } catch (error) {
       console.error('Failed to fetch events:', error);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    setUploading(true);
+    setUploadStatus('');
+
+    try {
+      const ext = file.name.split('.').pop();
+      const filename = `${uuidv4()}.${ext}`;
+      const filePath = `events/${filename}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('uploads')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, imageUrl: publicUrl }));
+      setUploadStatus(`✓ ${file.name} uploaded`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Upload failed: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -56,37 +104,38 @@ export default function EventsManagement() {
           description: formData[`description${langKey}`],
           location: formData[`location${langKey}`],
           mapUrl: formData.mapUrl,
+          imageUrl: formData.imageUrl,
           date: formData.date,
           time: formData.time,
           language: lang,
         };
 
-        await fetch('/api/events', {
+        const response = await fetch('/api/events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(eventData),
         });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Failed to add event');
+        }
       }
 
       alert('Event added successfully in all languages!');
       setShowForm(false);
       setFormData({
-        titleEn: '',
-        titleUr: '',
-        titleSd: '',
-        descriptionEn: '',
-        descriptionUr: '',
-        descriptionSd: '',
-        date: '',
-        time: '',
-        locationEn: '',
-        locationUr: '',
-        locationSd: '',
-        mapUrl: '',
+        titleEn: '', titleUr: '', titleSd: '',
+        descriptionEn: '', descriptionUr: '', descriptionSd: '',
+        date: '', time: '',
+        locationEn: '', locationUr: '', locationSd: '',
+        mapUrl: '', imageUrl: '',
       });
+      setUploadStatus('');
       fetchEvents();
     } catch (error) {
-      alert('Failed to add event');
+      console.error('Submit error:', error);
+      alert(`Failed to add event: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -252,6 +301,51 @@ export default function EventsManagement() {
                 </div>
               </div>
 
+              {/* Event Image Upload */}
+              <div className="space-y-3">
+                <Label>Event Image (Optional)</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="event-image-upload"
+                    onChange={handleImageUpload}
+                  />
+                  <label htmlFor="event-image-upload" className="cursor-pointer">
+                    {formData.imageUrl ? (
+                      <div className="relative w-full h-40 mb-3 group">
+                        <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover rounded-md" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md">
+                          <Upload className="text-white h-8 w-8" />
+                        </div>
+                      </div>
+                    ) : (
+                      <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('event-image-upload').click()}
+                      disabled={uploading}
+                      className="mb-2"
+                    >
+                      {uploading ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</>
+                      ) : (
+                        <><Upload className="mr-2 h-4 w-4" /> {formData.imageUrl ? 'Change Image' : 'Upload Event Image'}</>
+                      )}
+                    </Button>
+                    <p className="text-xs text-gray-500">Supports JPG, PNG, WEBP formats</p>
+                  </label>
+                </div>
+                {uploadStatus && (
+                  <p className="text-sm text-green-600 flex items-center">
+                    <CheckCircle className="mr-1 h-3 w-3" /> {uploadStatus}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <Label>Google Maps Location Link (Optional)</Label>
                 <Input
@@ -298,19 +392,41 @@ export default function EventsManagement() {
                   className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow gap-4"
                 >
                   <div className="flex items-start space-x-4 w-full sm:w-auto flex-1">
-                    <div className="bg-gradient-to-br from-orange-500 to-red-500 w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white flex-shrink-0">
-                      <span className="text-2xl font-bold">{new Date(event.date).getDate()}</span>
-                      <span className="text-xs">
-                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
-                      </span>
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      {event.imageUrl ? (
+                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="bg-gradient-to-br from-orange-500 to-red-500 w-full h-full flex flex-col items-center justify-center text-white">
+                          <span className="text-2xl font-bold">{new Date(event.date).getDate()}</span>
+                          <span className="text-xs uppercase">
+                            {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{event.description}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
-                        <span>{new Date(event.date).toLocaleDateString()}</span>
-                        {event.time && <span>{event.time}</span>}
-                        {event.location && <span>{event.location}</span>}
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
+                        <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">EN</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{event.description}</p>
+                      <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-2 text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <Calendar className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                          {new Date(event.date).toLocaleDateString()}
+                        </div>
+                        {event.time && (
+                          <div className="flex items-center">
+                            <Clock className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                            {event.time}
+                          </div>
+                        )}
+                        {event.location && (
+                          <div className="flex items-center">
+                            <MapPin className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                            {event.location}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
