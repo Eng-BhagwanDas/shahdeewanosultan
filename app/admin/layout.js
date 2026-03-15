@@ -19,11 +19,13 @@ import {
   X,
   Sliders,
   Feather,
+  Info,
 } from 'lucide-react';
 
 const menuItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Slider', href: '/admin/slider', icon: Sliders },
+  { name: 'Introduction', href: '/admin/introduction', icon: Info },
   { name: 'Saints', href: '/admin/saints', icon: Users },
   { name: 'Books', href: '/admin/books', icon: Book },
   { name: 'Audio', href: '/admin/audio', icon: Music },

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, ArrowLeft, Globe } from 'lucide-react';
+import { Download, ArrowLeft, Globe, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 const translations = {
@@ -34,7 +34,7 @@ const translations = {
     backToHome: 'واپس گهر',
     downloadPDF: 'پی ڊی ایف ڊائون لوڊ ڪريو',
     biography: 'سوانح حيات',
-    content: `حضرت شاهه دیوانو سلطان هڪ عظيم صوفي بزرگ ۽ روحاني رهنما هئا جن پنهنجي زندگي محبت، امن ۽ الهي حڪمت جي پيغام کي ڦهلائڻ لاءِ وقف ڪري ڇڏي. سنڌ جي مقدس سرزمين ۾ پيدا ٿيا، هو هزارين عقيدتمندن لاءِ روحاني روشني جو مينار بڻجي ويا.\n\nهنن جي تعليمات انسانيت سان محبت، خدا جي عبادت، ۽ انسانيت جي خدمت جي اهميت تي زور ڏنو. پنهنجي روحاني مشقن ۽ گهري حڪمت ذريعي، هنن بي شمار روحن کي راستبازي ۽ الهي تعلق جي رستي تي گامزن ڪيو.\n\nحضرت شاهه دیوانو سلطان جي درگاهه هنن جي روحاني ميراث جي گواهي آهي، جيڪا زندگي جي سمورن شعبن مان تعلق رکڻ وارن عقيدتمندن کي پنهنجي طرف ڇڪي ٿي جيڪي برڪتون، رهنمائي ۽ روحاني سڪون ڳوليندا آهن. عالمگير ڀائيچاري ۽ الهي محبت جو هنن جو پيغام نسلن کي متاثر ڪندو رهي ٿو.\n\nهنن جي زندگي ڪيترن ئي معجزن ۽ روحاني تجربن سان ڀري هئي جيڪي خدا سان هنن جي گهري تعلق کي ظاهر ڪن ٿا. جيڪي عقيدتمند هنن جي مبارڪ مزار جي زيارت ڪن ٿا اهي گهرو سڪون ۽ روحاني بلندي جو تجربو ڪن ٿا.\n\nدرگاهه ۾ سالانه عرس جي تقريب هزارين عقيدتمندن کي گڏ ڪري ٿي جيڪي هن عظيم بزرگ کي خراج عقيدت پيش ڪرڻ ۽ روحاني گڏجاڻين، قوالي جي محفلن ۽ خيراتي ڪمن ۾ حصو وٺڻ لاءِ گڏ ٿين ٿا.`,
+    content: `حضرت شاهه دیوانو سلطان هڪ عظيم صوفي بزرگ ۽ روحاني رهنما هئا جن پنهنجي زندگي محبت، امن ۽ الهي حڪمت جي پيغام کي ڦهلائڻ لاءِ وقف ڪري ڇڏي. سنڌ جي مقدس سرزمين ۾ پيدا ٿيا، هو هزارين عقيدتمندن لاءِ روحاني روشني جو مينار بڻجي ويا.\n\nهنن جي تعلیمات انسانيت سان محبت، خدا جي عبادت، ۽ انسانيت جي خدمت جي اهميت تي زور ڏنو. پنهنجي روحاني مشقن ۽ گهري حڪمت ذريعي، هنن بي شمار روحن کي راستبازي ۽ الهي تعلق جي رستي تي گامزن ڪيو.\n\nحضرت شاهه دیوانو سلطان جي درگاهه هنن جي روحاني ميراث جي گواهي آهي، جيڪا زندگي جي سمورن شعبن مان تعلق رکڻ وارن عقيدتمندن کي پنهنجي طرف ڇڪي ٿي جيڪي برڪتون، رهنمائي ۽ روحاني سڪون ڳوليندا آهن. عالمگير ڀائيچاري ۽ الهي محبت جو هنن جو پيغام نسلن کي متاثر ڪندو رهي ٿو.\n\nهنن جي زندگي ڪيترن ئي معجزن ۽ روحاني تجربن سان ڀري هئي جيڪي خدا سان هنن جي گهري تعلق کي ظاهر ڪن ٿا. جيڪي عقيدتمند هنن جي مبارڪ مزار جي زيارت ڪن ٿا اهي گهرو سڪون ۽ روحاني بلندي جو تجربو ڪن ٿا.\n\nدرگاهه ۾ سالانه عرس جي تقريب هزارين عقيدتمندن کي گڏ ڪري ٿي جيڪي هن عظيم بزرگ کي خراج عقيدت پيش ڪرڻ ۽ روحاني گڏجاڻين، قوالي جي محفلن ۽ خيراتي ڪمن ۾ حصو وٺڻ لاءِ گڏ ٿين ٿا.`,
     spiritualTeachings: 'روحاني تعليمات',
     teachings: 'هنن جي بنيادي تعليمات ۾ سموري مخلوق سان محبت، خدا جي عبادت، انسانيت جي خدمت، ۽ روحاني علم جي ڳولا شامل آهي. هنن زور ڏنو ته حقيقي روحانيت دل کي پاڪ ڪرڻ ۽ ٻين جي بي لوث خدمت ڪرڻ ۾ آهي.',
     legacy: 'ميراث',
@@ -45,11 +45,43 @@ const translations = {
 export default function IntroductionPage() {
   const [language, setLanguage] = useState('en');
   const [isRTL, setIsRTL] = useState(false);
+  const [dynamicContent, setDynamicContent] = useState(null);
+  const [loading, setLoading] = useState(false);
   const t = translations[language];
 
   const handleLanguageChange = (lang) => {
     setLanguage(lang);
     setIsRTL(lang === 'ur' || lang === 'sd');
+  };
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/content?page=introduction&language=${language}`);
+        const data = await response.json();
+        if (data.content) {
+          setDynamicContent(data.content);
+        } else {
+          setDynamicContent(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dynamic content:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchContent();
+  }, [language]);
+
+  const displayContent = {
+    biography: dynamicContent?.biography || t.content,
+    biographyPdf: dynamicContent?.biographyPdf || null,
+    spiritualTeachings: dynamicContent?.spiritualTeachings || t.teachings,
+    teachingsPdf: dynamicContent?.teachingsPdf || null,
+    legacy: dynamicContent?.legacy || t.legacyText,
+    legacyPdf: dynamicContent?.legacyPdf || null,
   };
 
   return (
@@ -111,69 +143,104 @@ export default function IntroductionPage() {
 
       {/* Content Section */}
       <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <Card className="hover:shadow-xl transition-shadow">
-            <CardContent className="p-6 text-center">
-              <Globe className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-gray-800">{t.biography}</h3>
-              <p className="text-gray-600">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
-              <Button className="mt-4 bg-emerald-600 hover:bg-emerald-700">
-                <Download className="mr-2 h-4 w-4" />
-                {t.downloadPDF}
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-xl transition-shadow">
-            <CardContent className="p-6 text-center">
-              <Globe className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-gray-800">{t.spiritualTeachings}</h3>
-              <p className="text-gray-600">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
-              <Button className="mt-4 bg-blue-600 hover:bg-blue-700">
-                <Download className="mr-2 h-4 w-4" />
-                {t.downloadPDF}
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="hover:shadow-xl transition-shadow">
-            <CardContent className="p-6 text-center">
-              <Globe className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-gray-800">{t.legacy}</h3>
-              <p className="text-gray-600">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
-              <Button className="mt-4 bg-purple-600 hover:bg-purple-700">
-                <Download className="mr-2 h-4 w-4" />
-                {t.downloadPDF}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <h2 className="text-3xl font-bold mb-6 text-emerald-800">{t.biography}</h2>
-            <div className="prose max-w-none text-gray-700 leading-relaxed text-lg">
-              {t.content.split('\n\n').map((paragraph, index) => (
-                <p key={index} className="mb-4">
-                  {paragraph}
-                </p>
-              ))}
+        {loading ? (
+          <div className="flex justify-center items-center py-24">
+            <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
+          </div>
+        ) : (
+          <>
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="p-6 text-center">
+                  <Globe className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold mb-2 text-gray-800">{t.biography}</h3>
+                  <p className="text-gray-600 mb-4">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
+                  {displayContent.biographyPdf ? (
+                    <a href={displayContent.biographyPdf} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700">
+                        <Download className="mr-2 h-4 w-4" />
+                        {t.downloadPDF}
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button disabled className="w-full bg-gray-300 text-gray-500 cursor-not-allowed">
+                      <Download className="mr-2 h-4 w-4" />
+                      Not Available
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="p-6 text-center">
+                  <Globe className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold mb-2 text-gray-800">{t.spiritualTeachings}</h3>
+                  <p className="text-gray-600 mb-4">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
+                  {displayContent.teachingsPdf ? (
+                    <a href={displayContent.teachingsPdf} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Download className="mr-2 h-4 w-4" />
+                        {t.downloadPDF}
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button disabled className="w-full bg-gray-300 text-gray-500 cursor-not-allowed">
+                      <Download className="mr-2 h-4 w-4" />
+                      Not Available
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="p-6 text-center">
+                  <Globe className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold mb-2 text-gray-800">{t.legacy}</h3>
+                  <p className="text-gray-600 mb-4">{language === 'en' ? 'Download in English' : language === 'ur' ? 'اردو میں ڈاؤن لوڈ کریں' : 'سنڌي ۾ ڊائون لوڊ ڪريو'}</p>
+                  {displayContent.legacyPdf ? (
+                    <a href={displayContent.legacyPdf} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                        <Download className="mr-2 h-4 w-4" />
+                        {t.downloadPDF}
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button disabled className="w-full bg-gray-300 text-gray-500 cursor-not-allowed">
+                      <Download className="mr-2 h-4 w-4" />
+                      Not Available
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card>
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-4 text-emerald-800">{t.spiritualTeachings}</h2>
-              <p className="text-gray-700 leading-relaxed">{t.teachings}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-8">
-              <h2 className="text-2xl font-bold mb-4 text-emerald-800">{t.legacy}</h2>
-              <p className="text-gray-700 leading-relaxed">{t.legacyText}</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="mb-8">
+              <CardContent className="p-8">
+                <h2 className="text-3xl font-bold mb-6 text-emerald-800">{t.biography}</h2>
+                <div className="prose max-w-none text-gray-700 leading-relaxed text-lg whitespace-pre-line">
+                  {displayContent.biography}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-4 text-emerald-800">{t.spiritualTeachings}</h2>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {displayContent.spiritualTeachings}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-8">
+                  <h2 className="text-2xl font-bold mb-4 text-emerald-800">{t.legacy}</h2>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {displayContent.legacy}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
