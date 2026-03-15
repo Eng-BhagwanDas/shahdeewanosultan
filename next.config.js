@@ -3,7 +3,9 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    // Remove if not using Server Components
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
   },
   webpack(config, { dev }) {
     if (dev) {
@@ -16,6 +18,7 @@ const nextConfig = {
     }
     return config;
   },
+  serverMaxBodySize: '50mb', // Some versions/deployments use this
   onDemandEntries: {
     maxInactiveAge: 10000,
     pagesBufferLength: 2,

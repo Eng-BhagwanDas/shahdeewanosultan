@@ -92,14 +92,24 @@ export default function AudioManagement() {
         body: formDataUpload,
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        setFormData(prev => ({ ...prev, audioUrl: result.url }));
-        setUploadStatus(`✓ ${file.name} uploaded successfully`);
-      } else {
-        throw new Error(result.error);
+      // Handle non-JSON responses (like 413 Request Entity Too Large)
+      const contentType = response.headers.get('content-type');
+      if (!response.ok) {
+        if (contentType && contentType.includes('application/json')) {
+          const result = await response.json();
+          throw new Error(result.error || `Server error: ${response.status}`);
+        } else {
+          const text = await response.text();
+          if (response.status === 413) {
+            throw new Error('The file is too large. Please try a smaller file (under 50MB).');
+          }
+          throw new Error(`Server error (${response.status}): ${text.slice(0, 100)}...`);
+        }
       }
+
+      const result = await response.json();
+      setFormData(prev => ({ ...prev, audioUrl: result.url }));
+      setUploadStatus(`✓ ${file.name} uploaded successfully`);
     } catch (error) {
       alert(`Upload failed: ${error.message}`);
       setUploadStatus('Upload failed');
