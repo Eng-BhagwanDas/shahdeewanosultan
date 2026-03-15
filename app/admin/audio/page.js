@@ -124,11 +124,16 @@ export default function AudioManagement() {
           category: formData[`category${langKey}`],
           language: lang,
         };
-        await fetch('/api/audio', {
+        const response = await fetch('/api/audio', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(audioData),
         });
+        
+        if (!response.ok) {
+           const errData = await response.json();
+           throw new Error(errData.error || 'Failed to add audio');
+        }
       }
       alert('Audio added successfully in all languages!');
       setShowForm(false);
@@ -141,7 +146,7 @@ export default function AudioManagement() {
       setUploadStatus('');
       fetchAudio();
     } catch (error) {
-      alert('Failed to add audio');
+      alert(`Failed to add audio: ${error.message}`);
     } finally {
       setLoading(false);
     }
