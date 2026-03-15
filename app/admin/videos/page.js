@@ -33,7 +33,8 @@ export default function VideosManagement() {
   };
 
   const extractYouTubeId = (url) => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
+    // Robust regex to handle standard, shorts, live, and embed links
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   };
@@ -45,26 +46,35 @@ export default function VideosManagement() {
     try {
       const videoId = extractYouTubeId(formData.youtubeUrl);
       if (!videoId) {
-        alert('Invalid YouTube URL');
+        alert('Invalid YouTube URL. Please provide a valid YouTube video, shorts, or live link.');
         setLoading(false);
         return;
       }
 
-      await fetch('/api/videos', {
+      console.log('Submitting video:', { ...formData, videoId, language: 'en' });
+
+      const response = await fetch('/api/videos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
           videoId,
+          language: 'en', // default to English for now
         }),
       });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to add video');
+      }
 
       alert('Video added successfully!');
       setShowForm(false);
       setFormData({ title: '', description: '', youtubeUrl: '' });
       fetchVideos();
     } catch (error) {
-      alert('Failed to add video');
+      console.error('Submit Error:', error);
+      alert(`Failed to add video: ${error.message}`);
     } finally {
       setLoading(false);
     }
