@@ -108,6 +108,10 @@ export default function BooksManagement() {
 
       const result = await uploadFile(formDataUpload);
 
+      if (!result) {
+        throw new Error('Server returned no response from upload action.');
+      }
+
       if (result.success) {
         const langKey = lang.charAt(0).toUpperCase() + lang.slice(1);
         setFormData(prev => ({ ...prev, [`pdfUrl${langKey}`]: result.url }));

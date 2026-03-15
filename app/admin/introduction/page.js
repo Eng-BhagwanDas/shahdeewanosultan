@@ -105,6 +105,10 @@ export default function IntroductionManagement() {
 
       const result = await uploadFile(formDataUpload);
 
+      if (!result) {
+        throw new Error('Server returned no response from upload action.');
+      }
+
       if (result.success) {
         setFormData(prev => ({
           ...prev,

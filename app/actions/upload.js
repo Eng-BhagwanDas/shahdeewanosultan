@@ -5,13 +5,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/lib/supabase';
 
 export async function uploadFile(formData) {
+  console.log('--- Upload Action Triggered ---');
   try {
     const file = formData.get('file');
     const type = formData.get('type') || 'general'; // books, audio, gallery, slider
 
     if (!file) {
+      console.log('No file found in formData');
       return { error: 'No file provided' };
     }
+    console.log(`Uploading file: ${file.name}, size: ${file.size}, type: ${file.type}, target: ${type}`);
 
     // Validate file type based on upload type
     const allowedTypes = {

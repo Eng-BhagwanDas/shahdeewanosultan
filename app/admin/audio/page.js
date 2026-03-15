@@ -89,6 +89,11 @@ export default function AudioManagement() {
       formDataUpload.append('type', 'audio');
 
       const result = await uploadFile(formDataUpload);
+      console.log('Upload Result:', result);
+
+      if (!result) {
+        throw new Error('Server returned no response. The file might be too large for the current timeout settings.');
+      }
 
       if (result.success) {
         setFormData(prev => ({ ...prev, audioUrl: result.url }));

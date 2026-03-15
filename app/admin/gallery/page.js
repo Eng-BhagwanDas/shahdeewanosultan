@@ -72,6 +72,10 @@ export default function GalleryManagement() {
 
       const result = await uploadFile(formDataUpload);
 
+      if (!result) {
+        throw new Error('Server returned no response from upload action.');
+      }
+
       if (result.success) {
         setFormData(prev => ({ ...prev, imageUrl: result.url }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
@@ -121,6 +125,10 @@ export default function GalleryManagement() {
         formDataUpload.append('type', 'gallery');
 
         const uploadResult = await uploadFile(formDataUpload);
+
+        if (!uploadResult) {
+          throw new Error('Server returned no response from upload action during bulk process.');
+        }
 
         if (!uploadResult.success) throw new Error(uploadResult.error || 'Upload failed');
 

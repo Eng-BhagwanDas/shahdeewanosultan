@@ -64,6 +64,10 @@ export default function SliderManagement() {
 
       const result = await uploadFile(formDataUpload);
 
+      if (!result) {
+        throw new Error('Server returned no response from upload action.');
+      }
+
       if (result.success) {
         setFormData(prev => ({ ...prev, imageUrl: result.url }));
         setUploadStatus(`✓ ${file.name} uploaded successfully`);
