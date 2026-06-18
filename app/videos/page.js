@@ -36,8 +36,11 @@ export default function VideosPage() {
 
   useEffect(() => {
     setIsRTL(language === 'ur' || language === 'sd');
-    fetchVideos();
   }, [language]);
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   const fetchVideos = async () => {
     try {

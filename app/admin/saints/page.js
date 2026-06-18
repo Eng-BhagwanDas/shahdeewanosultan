@@ -14,9 +14,9 @@ import { v4 as uuidv4 } from 'uuid';
 const saintsList = [
   { id: 'saint1', nameEn: 'Hazrat Syed Sakhi Shah Deewano', order: 1 },
   { id: 'saint2', nameEn: 'Hazrat Syed Sakhi Ismail Shah', order: 2 },
-  { id: 'saint3', nameEn: 'Faqir Abdul Qayoom Memon Aaziz', order: 3 },
-  { id: 'saint4', nameEn: 'Faqir Dilshad Ali Mastano Dilber', order: 4 },
-  { id: 'saint5', nameEn: 'Sahib Zada Faqir Ali Raza Momin Ali', order: 5 },
+  { id: 'saint3', nameEn: 'Faqeer Abdul Qayoom Aaziz', order: 3 },
+  { id: 'saint4', nameEn: 'Faqeer Dilshad Ali Mastano Dilbar', order: 4 },
+  { id: 'saint5', nameEn: 'Sahibzada Faqeer Ali Raza Momin Ali', order: 5 },
   { id: 'saint6', nameEn: 'Sindh Rani', order: 6 },
 ];
 

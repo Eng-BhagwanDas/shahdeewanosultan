@@ -31,27 +31,27 @@ const defaultSaintsData = {
     },
     {
       id: 'saint3',
-      name: 'Faqir Abdul Qayoom Memon Aaziz',
-      title: 'The Devoted Servant',
-      content: 'Faqir Abdul Qayoom Memon Aaziz was a humble servant of God whose life was dedicated to spiritual practices and service to humanity. His simplicity and devotion inspired many to follow the path of righteousness. He was known for his powerful duas and his ability to guide people through spiritual difficulties. His legacy continues through the countless lives he touched with his wisdom and compassion.',
+      name: 'Faqeer Abdul Qayoom Aaziz',
+      title: 'Khadmeen Darbar-e-Alia',
+      content: 'Faqeer Abdul Qayoom Aaziz was a dedicated custodian and one of the devoted Khadmeen of Darbar-e-Alia whose life was spent in spiritual practices, the service of the sacred shrine, and humanity. His simplicity, deep devotion, and selfless service inspired many to follow the path of righteousness. He was known for his powerful duas and his ability to guide people through spiritual difficulties. His legacy continues through the countless lives he touched with his wisdom and compassion.',
       pdfUrlEn: '',
       pdfUrlUr: '',
       pdfUrlSd: '',
     },
     {
       id: 'saint4',
-      name: 'Faqir Dilshad Ali Mastano Dilber',
+      name: 'Faqeer Dilshad Ali Mastano Dilbar',
       title: 'The Heart Captivator',
-      content: 'Faqir Dilshad Ali Mastano Dilber was a spiritual master whose divine love and ecstatic states captivated the hearts of devotees. His spiritual gatherings were filled with divine presence and his teachings focused on the transformative power of love for the Divine. He lived a life of complete surrender to Gods will and guided seekers to experience the joy of spiritual union.',
+      content: 'Faqeer Dilshad Ali Mastano Dilbar was a spiritual master whose divine love and ecstatic states captivated the hearts of devotees. His spiritual gatherings were filled with divine presence and his teachings focused on the transformative power of love for the Divine. He lived a life of complete surrender to Gods will and guided seekers to experience the joy of spiritual union.',
       pdfUrlEn: '',
       pdfUrlUr: '',
       pdfUrlSd: '',
     },
     {
       id: 'saint5',
-      name: 'Sahib Zada Faqir Ali Raza Momin Ali',
+      name: 'Sahibzada Faqeer Ali Raza Momin Ali',
       title: 'The Faithful Guide',
-      content: 'Sahib Zada Faqir Ali Raza Momin Ali was a spiritual guide who carried forward the blessed legacy of his ancestors. His deep understanding of spiritual sciences and his practical approach to guiding disciples made him a beloved figure. He emphasized the importance of maintaining faith, performing regular spiritual practices, and serving humanity as means to attain divine pleasure.',
+      content: 'Sahibzada Faqeer Ali Raza Momin Ali was a spiritual guide who carried forward the blessed legacy of his ancestors. His deep understanding of spiritual sciences and his practical approach to guiding disciples made him a beloved figure. He emphasized the importance of maintaining faith, performing regular spiritual practices, and serving humanity as means to attain divine pleasure.',
       pdfUrlEn: '',
       pdfUrlUr: '',
       pdfUrlSd: '',
@@ -148,36 +148,76 @@ export default function SaintsPage() {
   const [language, setLanguage] = useState('en');
   const [isRTL, setIsRTL] = useState(false);
   const [saintsData, setSaintsData] = useState(defaultSaintsData);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('saint1');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabId = params.get('id');
+      if (tabId) {
+        setActiveTab(tabId);
+      }
+    }
+  }, []);
+
+  // Local translation dictionary for UI elements
+  const t = {
+    en: {
+      backHome: 'Back to Home',
+      title: 'Blessed Saints',
+      subtitle: 'Lives of the Saints',
+      desc: 'Discover the spiritual legacy and teachings of our revered masters.',
+      nobleSaint: 'Noble Saint',
+      downloads: 'Downloads & Resources',
+      comingSoon: 'Coming Soon',
+      pdfDownload: 'Download PDF',
+      loading: 'Loading Spiritual Wisdom...',
+    },
+    ur: {
+      backHome: 'ہوم پیج پر واپس جائیں',
+      title: 'مقدس بزرگان',
+      subtitle: 'اولیاء اللہ کا تذکرہ',
+      desc: 'ہمارے معزز بزرگوں کی روحانی میراث اور تعلیمات کو دریافت کریں۔',
+      nobleSaint: 'عظیم بزرگ',
+      downloads: 'ڈاؤن لوڈ اور وسائل',
+      comingSoon: 'جلد آرہا ہے',
+      pdfDownload: 'پی ڈی ایف ڈاؤن لوڈ کریں',
+      loading: 'روحانی علم لوڈ ہو رہا ہے...',
+    },
+    sd: {
+      backHome: 'مکيه صفحي ڏانهن واپس',
+      title: 'مقدس بزرگ',
+      subtitle: 'اولياء الله جو ذڪر',
+      desc: 'اسان جي معزز بزرگن جي روحاني ورثي ۽ تعليمات کي دريافت ڪريو.',
+      nobleSaint: 'عظيم بزرگ',
+      downloads: 'ڊائون لوڊ ۽ وسيلا',
+      comingSoon: 'جلد اچي رهيو آهي',
+      pdfDownload: 'پي ڊي ايف ڊائون لوڊ',
+      loading: 'روحاني علم لوڊ ٿي رهيو آهي...',
+    }
+  }[language];
 
   // Fetch saints data from database for all languages
   useEffect(() => {
     const fetchAllSaints = async () => {
-      setLoading(true);
       try {
-        // Fetch saints for all three languages
-        const [enRes, urRes, sdRes] = await Promise.all([
-          fetch('/api/saints?language=en'),
-          fetch('/api/saints?language=ur'),
-          fetch('/api/saints?language=sd'),
-        ]);
+        const res = await fetch('/api/saints?language=all');
+        const data = await res.json();
+        const allSaints = data.saints || [];
 
-        const [enData, urData, sdData] = await Promise.all([
-          enRes.json(),
-          urRes.json(),
-          sdRes.json(),
-        ]);
+        const enSaints = allSaints.filter(s => s.language === 'en');
+        const urSaints = allSaints.filter(s => s.language === 'ur');
+        const sdSaints = allSaints.filter(s => s.language === 'sd');
 
         const newSaintsData = { ...defaultSaintsData };
 
-        // Helper function to merge API data with default data
         const mergeSaintsData = (defaultSaints, apiSaints) => {
           if (!apiSaints || apiSaints.length === 0) return defaultSaints;
           
           const merged = [...defaultSaints];
           const matchedApiIds = new Set();
 
-          // Update existing defaults with API data
           const processedDefaults = merged.map((defaultSaint) => {
             const apiSaint = apiSaints.find(
               (s) => s.id === defaultSaint.id || s.saintId === defaultSaint.id
@@ -199,7 +239,6 @@ export default function SaintsPage() {
             return defaultSaint;
           });
 
-          // Add any completely new saints from the API that aren't in defaults
           const newApiSaints = apiSaints
             .filter((s) => !matchedApiIds.has(s.id) && !matchedApiIds.has(s.saintId))
             .map((apiSaint, idx) => ({
@@ -215,24 +254,21 @@ export default function SaintsPage() {
             }));
 
           const combined = [...processedDefaults, ...newApiSaints];
-          // Sort by order 
           return combined.sort((a, b) => (a.order || 99) - (b.order || 99));
         };
 
-        newSaintsData.en = mergeSaintsData(defaultSaintsData.en, enData.saints);
+        newSaintsData.en = mergeSaintsData(defaultSaintsData.en, enSaints);
         
-        // For Urdu, the API returns the generic pdfUrl which might shadow pdfUrlUr, handling it in mergeSaintsData
-        newSaintsData.ur = mergeSaintsData(defaultSaintsData.ur, urData.saints).map(s => {
-          const apiMatch = urData.saints?.find(db => db.id === s.id || db.saintId === s.id);
+        newSaintsData.ur = mergeSaintsData(defaultSaintsData.ur, urSaints).map(s => {
+          const apiMatch = urSaints?.find(db => db.id === s.id || db.saintId === s.id);
           if (apiMatch) {
              s.pdfUrlUr = apiMatch.pdfUrlUr || apiMatch.pdfUrl || s.pdfUrlUr;
           }
           return s;
         });
 
-        // For Sindhi
-        newSaintsData.sd = mergeSaintsData(defaultSaintsData.sd, sdData.saints).map(s => {
-          const apiMatch = sdData.saints?.find(db => db.id === s.id || db.saintId === s.id);
+        newSaintsData.sd = mergeSaintsData(defaultSaintsData.sd, sdSaints).map(s => {
+          const apiMatch = sdSaints?.find(db => db.id === s.id || db.saintId === s.id);
           if (apiMatch) {
              s.pdfUrlSd = apiMatch.pdfUrlSd || apiMatch.pdfUrl || s.pdfUrlSd;
           }
@@ -242,7 +278,6 @@ export default function SaintsPage() {
         setSaintsData(newSaintsData);
       } catch (error) {
         console.error('Failed to fetch saints:', error);
-        // Keep default data on error
       } finally {
         setLoading(false);
       }
@@ -260,44 +295,52 @@ export default function SaintsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-12 w-12 animate-spin text-emerald-600" />
-          <p className="mt-4 text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-gradient-to-b from-zinc-950 to-emerald-950 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fbbf24_1px,transparent_0)] [background-size:20px_20px]" />
+        <div className="text-center relative z-10">
+          <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+            <div className="absolute inset-0 border-4 border-amber-500/20 border-t-amber-400 rounded-full animate-spin" />
+            <span className="text-amber-400 text-3xl">☪</span>
+          </div>
+          <p className="text-amber-200/90 text-lg font-light tracking-wide animate-pulse">
+            {t.loading}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-neutral-50 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-gradient-to-b from-zinc-950 via-emerald-950 to-zinc-950 text-white ${isRTL ? 'rtl' : 'ltr'} ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : 'font-sans'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      
       {/* Navigation Bar */}
-      <nav className="bg-gradient-to-r from-emerald-900 to-emerald-800 text-white shadow-xl sticky top-0 z-50">
+      <nav className="sticky top-0 z-50 backdrop-blur-md bg-emerald-950/80 border-b border-emerald-800/30 text-white shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link href="/">
-              <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white transition-colors">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {language === 'en' ? 'Back to Home' : language === 'ur' ? 'واپس ہوم پیج' : 'واپس گهر'}
+              <Button variant="ghost" className="text-white hover:bg-white/10 hover:text-white transition-colors rounded-xl border border-white/5 bg-white/5">
+                <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                {t.backHome}
               </Button>
             </Link>
-            <h1 className="text-xl md:text-2xl font-bold text-center flex-1 tracking-wide">
-              {language === 'en' ? 'Blessed Saints' : language === 'ur' ? 'مقدس بزرگان' : 'مقدس بزرگ'}
+            
+            <h1 className="text-lg md:text-2xl font-bold text-center flex-1 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 drop-shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+              {t.title}
             </h1>
-            <div className="flex space-x-1">
+            
+            <div className="flex space-x-1.5 bg-black/20 p-1 rounded-xl border border-white/5">
               {['en', 'ur', 'sd'].map((lang) => (
-                <Button
+                <button
                   key={lang}
-                  variant="ghost"
-                  size="sm"
                   onClick={() => handleLanguageChange(lang)}
-                  className={cn(
-                    "uppercase text-xs font-semibold px-2 hover:bg-white/10 hover:text-white",
-                    language === lang ? "bg-white/20 text-white ring-1 ring-white/30" : "text-emerald-100"
-                  )}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all duration-300 font-semibold ${
+                    language === lang
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-emerald-950 shadow-md font-bold'
+                      : 'text-white/80 hover:text-white hover:bg-white/5'
+                  }`}
                 >
                   {lang === 'en' ? 'ENG' : lang === 'ur' ? 'اردو' : 'سنڌي'}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -305,53 +348,62 @@ export default function SaintsPage() {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative h-48 md:h-64 overflow-hidden bg-emerald-900">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] opacity-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 via-transparent to-transparent"></div>
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center relative z-10">
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 drop-shadow-md">
-            {language === 'en' ? 'Lives of the Saints' : language === 'ur' ? 'اولیاء اللہ کا تذکرہ' : 'اولياء الله جو ذڪر'}
-          </h1>
-          <p className="text-emerald-100 text-lg md:text-xl opacity-90 max-w-2xl">
-            {language === 'en'
-              ? 'Discover the spiritual legacy and teachings of our revered masters.'
-              : language === 'ur'
-                ? 'ہمارے معزز بزرگوں کی روحانی میراث اور تعلیمات کو دریافت کریں۔'
-                : 'اسان جي معزز بزرگن جي روحاني ورثي ۽ تعليمات کي دريافت ڪريو.'}
+      <div className="relative py-16 md:py-24 overflow-hidden bg-gradient-to-b from-emerald-950 to-zinc-950 border-b border-emerald-900/30">
+        <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#fbbf24_1px,transparent_0)] [background-size:20px_20px] pointer-events-none" />
+        <div className="container mx-auto px-4 relative z-10 text-center">
+          <div className="flex items-center justify-center space-x-4 mb-4">
+            <div className="w-12 h-[1px] bg-gradient-to-r from-transparent to-amber-400" />
+            <span className="text-amber-400 text-xl drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">☪</span>
+            <div className="w-12 h-[1px] bg-gradient-to-l from-transparent to-amber-400" />
+          </div>
+          
+          <h2 className={`text-4xl md:text-6xl text-white mb-4 drop-shadow-md tracking-wide ${language === 'ur' ? 'font-urdu font-normal leading-[2.2]' : language === 'sd' ? 'font-sindhi font-normal leading-[2.0]' : 'font-bold font-serif'}`}>
+            {t.subtitle}
+          </h2>
+          <p className={`text-emerald-200/80 max-w-2xl mx-auto font-light ${language === 'ur' ? 'text-lg md:text-xl leading-[2.2]' : language === 'sd' ? 'text-lg md:text-xl leading-[2.0]' : 'text-base md:text-xl leading-relaxed'}`}>
+            {t.desc}
           </p>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="container mx-auto px-4 py-8 md:py-16">
-        <Tabs defaultValue={saints[0]?.id || 'saint1'} orientation="vertical" className="flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-12 md:py-20">
+        <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex flex-col lg:flex-row gap-8 md:gap-12">
 
           {/* Sidebar / Tabs List */}
-          <TabsList className="flex lg:flex-col items-stretch justify-start lg:w-1/4 h-auto bg-transparent p-0 space-x-2 lg:space-x-0 lg:space-y-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 min-w-0">
+          <TabsList className="flex flex-row flex-nowrap lg:flex-col items-stretch justify-start w-full lg:w-1/4 h-auto bg-transparent p-0 gap-3 lg:gap-4 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 min-w-0 border-none no-scrollbar mobile-tab-list">
             {saints.map((saint) => (
               <TabsTrigger
                 key={saint.id}
                 value={saint.id}
                 className={cn(
-                  "relative flex flex-col items-start justify-center p-4 rounded-xl border border-transparent transition-all duration-300 text-left whitespace-normal h-auto min-h-[5rem]",
-                  "data-[state=active]:bg-white data-[state=active]:border-emerald-100 data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                  "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-1/4 data-[state=active]:after:bottom-1/4 data-[state=active]:after:w-1 data-[state=active]:after:bg-emerald-500 data-[state=active]:after:rounded-r-full",
-                  "hover:bg-white/50 hover:border-emerald-100/50"
+                  "relative flex flex-col items-start justify-center p-5 rounded-2xl border transition-all duration-300 text-left whitespace-normal h-auto min-h-[6.5rem] w-64 sm:w-72 lg:w-full shrink-0 flex-shrink-0 group mobile-tab-trigger",
+                  "border-emerald-800/20 bg-emerald-950/15 text-gray-300 hover:text-white hover:bg-emerald-900/30 hover:border-amber-500/20",
+                  "data-[state=active]:bg-emerald-900/60 data-[state=active]:border-amber-400 data-[state=active]:text-amber-400 data-[state=active]:shadow-lg data-[state=active]:shadow-amber-500/5 data-[state=active]:scale-[1.02]",
+                  isRTL 
+                    ? "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:right-0 data-[state=active]:after:top-1/4 data-[state=active]:after:bottom-1/4 data-[state=active]:after:w-1 data-[state=active]:after:bg-amber-400 data-[state=active]:after:rounded-l-full"
+                    : "data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:top-1/4 data-[state=active]:after:bottom-1/4 data-[state=active]:after:w-1 data-[state=active]:after:bg-amber-400 data-[state=active]:after:rounded-r-full"
                 )}
               >
                 <span className={cn(
-                  "font-bold text-sm md:text-base line-clamp-2 w-full",
-                  "data-[state=active]:text-emerald-800 text-slate-600"
+                  "text-sm md:text-base line-clamp-1 w-full transition-colors group-hover:text-white group-data-[state=active]:text-amber-400",
+                  isRTL ? "text-right" : "text-left",
+                  language === 'ur' ? 'font-urdu font-normal leading-[1.8]' : language === 'sd' ? 'font-sindhi font-normal leading-[1.8]' : 'font-bold'
                 )}>
                   {saint.name}
                 </span>
-                <span className="text-xs text-emerald-600/70 mt-1 uppercase tracking-wider font-semibold hidden md:block">
-                  {saint.title?.split(' ')[0]}...
+                <span className={cn(
+                  "text-xs mt-1.5 font-light line-clamp-1 w-full transition-colors opacity-75 group-hover:opacity-100",
+                  isRTL ? "text-right text-emerald-400/80" : "text-left text-emerald-300/80",
+                  language === 'ur' ? 'font-urdu font-normal leading-[1.8]' : language === 'sd' ? 'font-sindhi font-normal leading-[1.8]' : ''
+                )}>
+                  {saint.title}
                 </span>
+                
                 {isRTL ? (
-                  <ChevronRight className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-200 opacity-0 data-[state=active]:opacity-100 transition-opacity rotate-180" />
+                  <ChevronRight className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400 opacity-0 group-data-[state=active]:opacity-100 transition-all duration-300 rotate-180" />
                 ) : (
-                  <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-200 opacity-0 data-[state=active]:opacity-100 transition-opacity" />
+                  <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400 opacity-0 group-data-[state=active]:opacity-100 transition-all duration-300" />
                 )}
               </TabsTrigger>
             ))}
@@ -361,94 +413,89 @@ export default function SaintsPage() {
           <div className="flex-1 min-w-0">
             {saints.map((saint) => (
               <TabsContent key={saint.id} value={saint.id} className="mt-0 focus-visible:outline-none animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-sm overflow-hidden rounded-2xl ring-1 ring-slate-900/5">
-                  <div className="md:flex">
-                    {/* Image Section - Mobile: Top, Desktop: Right Side or Left Side? Let's go with standard Layout */}
-                  </div>
-
+                <Card className="border border-emerald-500/20 shadow-2xl bg-emerald-950/20 backdrop-blur-md overflow-hidden rounded-3xl relative gold-glow">
                   <CardContent className="p-0">
-                    <div className="relative h-64 md:h-96 w-full overflow-hidden group">
+                    
+                    {/* Header Image Cover */}
+                    <div className="relative h-64 md:h-[400px] w-full overflow-hidden group">
                       <img
                         src={saint.imageUrl || "https://images.unsplash.com/photo-1542414110-ae27fdb87ee1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxpc2xhbWljJTIwYXJjaGl0ZWN0dXJlfGVufDB8fHx8MTc2MDAwOTQ5Mnww&ixlib=rb-4.1.0&q=85"}
                         alt={saint.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                      <div className={`absolute bottom-0 ${isRTL ? 'right-0 text-right' : 'left-0 text-left'} p-6 md:p-8 text-white w-full md:max-w-[85%]`}>
-                        <div className="inline-block px-3 py-1 mb-3 lg:mb-4 text-xs font-bold tracking-wider uppercase bg-emerald-500/90 rounded-full backdrop-blur-md shadow-sm">
-                          {language === 'en' ? 'Noble Saint' : language === 'ur' ? 'عظیم بزرگ' : 'عظيم بزرگ'}
+                      <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/45 to-transparent"></div>
+                      <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
+                      
+                      <div className={`absolute bottom-0 ${isRTL ? 'right-0 text-right' : 'left-0 text-left'} p-6 md:p-10 text-white w-full`}>
+                        <div className="inline-flex items-center space-x-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 mb-4 text-xs font-bold tracking-wider uppercase rounded-full backdrop-blur-md shadow-sm">
+                          <span className="text-amber-400">✦</span>
+                          <span>{t.nobleSaint}</span>
                         </div>
-                        <h2 className={`font-bold text-2xl md:text-4xl leading-snug md:leading-tight mb-3 lg:mb-4 drop-shadow-lg ${language === 'ur' ? 'font-urdu' : language === 'sd' ? 'font-sindhi' : ''}`}>
+                        
+                        <h2 className={`text-2xl md:text-5xl mb-4 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] ${language === 'ur' ? 'font-urdu font-normal leading-[2.2]' : language === 'sd' ? 'font-sindhi font-normal leading-[2.0]' : 'font-bold font-serif leading-tight'}`}>
                           {saint.name}
                         </h2>
-                        <p className="text-emerald-50 text-base md:text-lg font-medium drop-shadow-md pb-2 md:pb-0">{saint.title}</p>
+                        <p className={`text-amber-200/90 text-base md:text-xl font-medium drop-shadow-md italic ${language === 'ur' ? 'font-urdu font-normal leading-[1.8]' : language === 'sd' ? 'font-sindhi font-normal leading-[1.8]' : ''}`}>{saint.title}</p>
                       </div>
                     </div>
 
-                    <div className="p-8 md:p-12">
-                      <div className="prose prose-lg max-w-none prose-headings:text-emerald-900 prose-p:text-slate-600 prose-a:text-emerald-600">
-                        <p className={`whitespace-pre-line ${language === 'ur' ? 'font-urdu text-xl leading-[2.2]' : language === 'sd' ? 'font-sindhi text-lg leading-relaxed' : 'text-lg leading-relaxed text- justify'}`}>
+                    {/* Content Section */}
+                    <div className="p-8 md:p-12 bg-gradient-to-b from-emerald-950/45 to-zinc-950/60">
+                      <div className="prose prose-invert prose-lg max-w-none">
+                        <p className={`whitespace-pre-line text-gray-200/95 text-justify ${language === 'ur' ? 'font-urdu text-xl md:text-2xl leading-[2.2]' : language === 'sd' ? 'font-sindhi text-lg md:text-xl leading-[1.8]' : 'text-base md:text-lg leading-relaxed'}`}>
                           {saint.content}
                         </p>
                       </div>
 
-                      <div className="mt-12 pt-8 border-t border-slate-100">
-                        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
-                          <Download className="mr-2 h-5 w-5 text-emerald-500" />
-                          {language === 'en' ? 'Downloads & Resources' : language === 'ur' ? 'ڈاؤن لوڈ اور وسائل' : 'ڊائون لوڊ ۽ وسيلا'}
+                      {/* Downloads and Resources Section */}
+                      <div className="mt-12 pt-8 border-t border-emerald-900/40">
+                        <h3 className="text-xl font-bold text-white mb-6 flex items-center space-x-3">
+                          <Download className="h-5 w-5 text-amber-400" />
+                          <span className="font-serif tracking-wide">{t.downloads}</span>
                         </h3>
 
-                        <div className="grid sm:grid-cols-3 gap-4">
-                          {/* PDF Buttons */}
+                        <div className="grid sm:grid-cols-3 gap-6">
                           {[
-                            { lang: 'English', code: 'En', labelEn: 'English PDF', labelUr: 'انگریزی پی ڈی ایف', labelSd: 'انگريزي پي ڊي ايف', url: saint.pdfUrlEn, color: 'emerald' },
-                            { lang: 'Urdu', code: 'Ur', labelEn: 'Urdu PDF', labelUr: 'اردو پی ڈی ایف', labelSd: 'اردو پي ڊي ايف', url: saint.pdfUrlUr, color: 'blue' },
-                            { lang: 'Sindhi', code: 'Sd', labelEn: 'Sindhi PDF', labelUr: 'سندھی پی ڈی ایف', labelSd: 'سنڌي پي ڊي ايف', url: saint.pdfUrlSd, color: 'purple' }
-                          ].map((item) => (
-                            <div key={item.code} className="group relative">
-                              {item.url ? (
-                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
-                                  <div className={`p-4 rounded-xl border transition-all duration-300 hover:shadow-md cursor-pointer 
-                                      ${item.color === 'emerald' ? 'bg-emerald-50 border-emerald-100 hover:border-emerald-300' :
-                                      item.color === 'blue' ? 'bg-blue-50 border-blue-100 hover:border-blue-300' :
-                                        'bg-purple-50 border-purple-100 hover:border-purple-300'}`}>
-                                    <div className="flex items-center justify-between mb-2">
-                                      <span className={`text-xs font-bold uppercase tracking-wider 
-                                          ${item.color === 'emerald' ? 'text-emerald-600' :
-                                          item.color === 'blue' ? 'text-blue-600' :
-                                            'text-purple-600'}`}>
+                            { lang: 'English', code: 'En', label: 'English PDF', url: saint.pdfUrlEn, color: 'from-amber-500/20 to-yellow-600/10 hover:border-amber-400/40 hover:from-amber-500/30' },
+                            { lang: 'Urdu', code: 'Ur', label: 'Urdu PDF', url: saint.pdfUrlUr, color: 'from-emerald-500/20 to-teal-600/10 hover:border-emerald-400/40 hover:from-emerald-500/30' },
+                            { lang: 'Sindhi', code: 'Sd', label: 'Sindhi PDF', url: saint.pdfUrlSd, color: 'from-cyan-500/20 to-blue-600/10 hover:border-cyan-400/40 hover:from-cyan-500/30' }
+                          ].map((item) => {
+                            const hasUrl = !!item.url;
+                            return (
+                              <div key={item.code} className="group relative">
+                                {hasUrl ? (
+                                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="block h-full">
+                                    <div className={`h-full p-5 rounded-2xl border border-emerald-800/20 bg-gradient-to-br ${item.color} transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 flex flex-col justify-between min-h-[110px]`}>
+                                      <div className="flex items-center justify-between mb-3">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400/90">
+                                          {item.lang}
+                                        </span>
+                                        <Download className="h-4 w-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                                      </div>
+                                      <div className={`font-semibold text-white group-hover:text-amber-300 transition-colors text-sm sm:text-base ${isRTL ? 'text-right' : 'text-left'}`}>
+                                        {t.pdfDownload}
+                                      </div>
+                                    </div>
+                                  </a>
+                                ) : (
+                                  <div className="h-full p-5 rounded-2xl border border-emerald-900/30 bg-emerald-950/10 opacity-50 flex flex-col justify-between min-h-[110px]">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                                         {item.lang}
                                       </span>
-                                      <Download className={`h-4 w-4 opacity-50 
-                                          ${item.color === 'emerald' ? 'text-emerald-600' :
-                                          item.color === 'blue' ? 'text-blue-600' :
-                                            'text-purple-600'}`} />
+                                      <Download className="h-4 w-4 text-gray-600" />
                                     </div>
-                                    <div className={`font-semibold ${isRTL ? 'text-right' : 'text-left'} 
-                                         ${item.color === 'emerald' ? 'text-emerald-900 cover' :
-                                        item.color === 'blue' ? 'text-blue-900' :
-                                          'text-purple-900'}`}>
-                                      {language === 'en' ? item.labelEn : language === 'ur' ? item.labelUr : item.labelSd}
+                                    <div className={`font-semibold text-gray-500 text-sm sm:text-base ${isRTL ? 'text-right' : 'text-left'}`}>
+                                      {t.comingSoon}
                                     </div>
                                   </div>
-                                </a>
-                              ) : (
-                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50 opacity-60">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                      {item.lang}
-                                    </span>
-                                    <Download className="h-4 w-4 text-slate-300" />
-                                  </div>
-                                  <div className={`font-semibold text-slate-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                    {language === 'en' ? 'Coming Soon' : language === 'ur' ? 'جلد آرہا ہے' : 'جلد اچي رهيو آهي'}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
+
                     </div>
                   </CardContent>
                 </Card>
@@ -457,6 +504,7 @@ export default function SaintsPage() {
           </div>
         </Tabs>
       </div>
+
     </div>
   );
 }

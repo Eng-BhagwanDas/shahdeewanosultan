@@ -67,8 +67,11 @@ export default function GalleryPage() {
 
   useEffect(() => {
     setIsRTL(language === 'ur' || language === 'sd');
-    fetchImages();
   }, [language]);
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   const fetchImages = async () => {
     try {

@@ -139,3 +139,82 @@ code {
     @apply bg-background text-foreground;
     }
 }
+
+/* Custom premium classes for Dargah site */
+.gold-text-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.emerald-glass {
+  background: rgba(6, 78, 59, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.gold-glow {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gold-glow:hover {
+  box-shadow: 0 20px 35px -10px rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateY(-4px);
+}
+
+.islamic-pattern {
+  background-color: #fcfdfa;
+  background-image: radial-gradient(rgba(16, 185, 129, 0.04) 1.5px, transparent 1.5px),
+                    radial-gradient(rgba(245, 158, 11, 0.03) 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+}
+
+@keyframes smooth-marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-33.33%, 0, 0); }
+}
+
+.animate-smooth-marquee {
+  display: flex;
+  width: max-content;
+  animation: smooth-marquee 35s linear infinite;
+}
+
+.animate-smooth-marquee:hover {
+  animation-play-state: paused;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (max-width: 1023px) {
+  .mobile-tab-trigger {
+    min-width: 240px !important;
+    width: 240px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .mobile-tab-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+}
+
+.font-urdu {
+  line-height: 1.8;
+}
+.font-sindhi {
+  line-height: 1.8;
+}

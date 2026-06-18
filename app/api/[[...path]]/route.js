@@ -11,6 +11,14 @@ function corsHeaders() {
   };
 }
 
+// Helper to handle CORS and caching for GET requests
+function cacheHeaders() {
+  return {
+    ...corsHeaders(),
+    'Cache-Control': 'public, max-age=5, s-maxage=30, stale-while-revalidate=120',
+  };
+}
+
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders() });
 }
@@ -24,40 +32,39 @@ export async function GET(request, { params }) {
 
     // Get dashboard stats
     if (path === 'stats') {
-      const tables = [
-        { name: 'saints', lang: true },
-        { name: 'books', lang: true },
-        { name: 'audio', lang: true },
-        { name: 'videos', lang: false },
-        { name: 'events', lang: true },
-        { name: 'gallery', lang: false },
-        { name: 'news', lang: true },
-        { name: 'slider', lang: false },
-        { name: 'poetry', lang: true }
-      ];
+      const sql = `
+        SELECT 
+          (SELECT COUNT(*)::int FROM saints WHERE language = 'en') as saints,
+          (SELECT COUNT(*)::int FROM books WHERE language = 'en') as books,
+          (SELECT COUNT(*)::int FROM audio WHERE language = 'en') as audio,
+          (SELECT COUNT(*)::int FROM videos) as videos,
+          (SELECT COUNT(*)::int FROM events WHERE language = 'en') as events,
+          (SELECT COUNT(*)::int FROM gallery) as gallery,
+          (SELECT COUNT(*)::int FROM news WHERE language = 'en') as news,
+          (SELECT COUNT(*)::int FROM slider) as slider,
+          (SELECT COUNT(*)::int FROM poetry WHERE language = 'en') as poetry
+      `;
+      
+      const res = await querySingle(sql);
+      const stats = {
+        saints: res.saints || 0,
+        books: res.books || 0,
+        audio: res.audio || 0,
+        videos: res.videos || 0,
+        events: res.events || 0,
+        gallery: res.gallery || 0,
+        news: res.news || 0,
+        slider: res.slider || 0,
+        poetry: res.poetry || 0
+      };
 
-      const stats = {};
-
-      for (const table of tables) {
-        let sql = `SELECT COUNT(*) FROM ${table.name}`;
-        const params = [];
-
-        if (table.lang) {
-          sql += ` WHERE language = $1`;
-          params.push('en');
-        }
-
-        const res = await querySingle(sql, params);
-        stats[table.name] = parseInt(res.count);
-      }
-
-      return NextResponse.json({ stats }, { headers: corsHeaders() });
+      return NextResponse.json({ stats }, { headers: cacheHeaders() });
     }
 
     // Get slider images
     if (path === 'slider') {
       const result = await query('SELECT * FROM slider ORDER BY "order" ASC');
-      return NextResponse.json({ slides: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ slides: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get content by page name and language
@@ -80,17 +87,25 @@ export async function GET(request, { params }) {
         delete content.data;
       }
 
-      return NextResponse.json({ content }, { headers: corsHeaders() });
+      return NextResponse.json({ content }, { headers: cacheHeaders() });
     }
 
     // Get all saints
     if (path === 'saints') {
-      const language = searchParams.get('language') || 'en';
+      const language = searchParams.get('language');
+      
+      if (language === 'all' || !language) {
+        const result = await query(
+          'SELECT * FROM saints ORDER BY "order" ASC'
+        );
+        return NextResponse.json({ saints: result.rows }, { headers: cacheHeaders() });
+      }
+
       const result = await query(
         'SELECT * FROM saints WHERE language = $1 ORDER BY "order" ASC',
         [language]
       );
-      return NextResponse.json({ saints: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ saints: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get saint by ID
@@ -103,7 +118,7 @@ export async function GET(request, { params }) {
         [saintId, language]
       );
 
-      return NextResponse.json({ saint }, { headers: corsHeaders() });
+      return NextResponse.json({ saint }, { headers: cacheHeaders() });
     }
 
     // Get books
@@ -113,7 +128,7 @@ export async function GET(request, { params }) {
         'SELECT * FROM books WHERE language = $1 ORDER BY "createdAt" DESC',
         [language]
       );
-      return NextResponse.json({ books: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ books: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get audio files
@@ -132,13 +147,13 @@ export async function GET(request, { params }) {
       sql += ' ORDER BY "createdAt" DESC';
 
       const result = await query(sql, params);
-      return NextResponse.json({ audioFiles: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ audioFiles: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get videos
     if (path === 'videos') {
       const result = await query('SELECT * FROM videos ORDER BY "createdAt" DESC');
-      return NextResponse.json({ videos: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ videos: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get events
@@ -148,7 +163,7 @@ export async function GET(request, { params }) {
         'SELECT * FROM events WHERE language = $1 ORDER BY "date" ASC',
         [language]
       );
-      return NextResponse.json({ events: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ events: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get news/press releases
@@ -158,13 +173,13 @@ export async function GET(request, { params }) {
         'SELECT * FROM news WHERE language = $1 ORDER BY "date" DESC',
         [language]
       );
-      return NextResponse.json({ news: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ news: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get gallery images
     if (path === 'gallery') {
       const result = await query('SELECT * FROM gallery ORDER BY "createdAt" DESC');
-      return NextResponse.json({ gallery: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ gallery: result.rows }, { headers: cacheHeaders() });
     }
 
     // Get poetry
@@ -174,7 +189,7 @@ export async function GET(request, { params }) {
         'SELECT * FROM poetry WHERE language = $1 ORDER BY "createdAt" DESC',
         [language]
       );
-      return NextResponse.json({ poetry: result.rows }, { headers: corsHeaders() });
+      return NextResponse.json({ poetry: result.rows }, { headers: cacheHeaders() });
     }
 
     return NextResponse.json({ error: 'Route not found' }, { status: 404, headers: corsHeaders() });

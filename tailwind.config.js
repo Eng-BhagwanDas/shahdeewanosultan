@@ -19,7 +19,7 @@ module.exports = {
 		extend: {
 			fontFamily: {
 				sans: ['var(--font-inter)', 'sans-serif'],
-				urdu: ['var(--font-noto-nastaliq)', 'serif'],
+				urdu: ['var(--font-noto-sans-arabic)', 'sans-serif'],
 				sindhi: ['var(--font-noto-sans-arabic)', 'sans-serif'],
 			},
 			colors: {
